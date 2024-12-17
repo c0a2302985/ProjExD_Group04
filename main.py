@@ -164,7 +164,8 @@ class Bomb:
         pg.draw.circle(self.img, color, (rad, rad), rad)
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
-        self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
+        self.rct.center = (WIDTH/2,HEIGHT/2)
+        # self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
 
     def update(self, screen: pg.Surface):
@@ -273,21 +274,25 @@ def main():
         goal.update(screen)
         goal2.update(screen) 
 
-        # こうかとんがゴールに到達したか判定
+        # ゴールに到達したか判定
         if bomb.rct.colliderect(goal.rct):
-            fonto = pg.font.Font(None, 80)
-            txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-            screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-            pg.display.update()
+            score.score += 1  # 1点アップ
+            bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+            # fonto = pg.font.Font(None, 80)
+            # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+            # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+            # pg.display.update()
             time.sleep(2)
-            return
+            # return
         if bomb.rct.colliderect(goal2.rct):
-            fonto = pg.font.Font(None, 80)
-            txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-            screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-            pg.display.update()
+            score.score += 1  # 1点アップ
+            bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+            # fonto = pg.font.Font(None, 80)
+            # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+            # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+            # pg.display.update()
             time.sleep(2)
-            return
+            # return
         
         if limit.time == 0:
             fonto = pg.font.Font(None, 80)
