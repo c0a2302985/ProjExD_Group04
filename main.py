@@ -160,6 +160,7 @@ class Bomb:
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
         self.color = color  # ★
         self.rad = rad  # ★
         self.img = pg.Surface((2*rad, 2*rad))
@@ -168,6 +169,21 @@ class Bomb:
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
+
+        self.img_mozi = self.fonto.render("まだ！", 0, (255, 0, 0))
+        self.rct_mozi = self.img_mozi.get_rect()
+        self.rct_mozi.center = (400, 50)
+
+
+        # スキル発動可能テキスト ★
+        self.count_large = 0  # 爆弾の大きさ変更スキル発動 frameカウント
+        self.large_frame = 400  # 発動に必要なframeカウント数 (爆弾の大きさ変更)
+
+        if self.count_large >= self.large_frame:
+            self.img_mozi = self.fonto.render("爆弾スキルOK！", 0, (255, 0, 0))
+            self.rct_mozi = self.img_mozi.get_rect()
+            self.rct_mozi.center = (400, 50)
+        
 
     def resize(self, factor: float):  # ★
         """
@@ -180,6 +196,7 @@ class Bomb:
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect(center=self.rct.center)
 
+        # 大きさ変更後の爆弾 画面外との当たり判定
         if self.rct.left < 0:
             self.rct.left = 0
         if self.rct.right > WIDTH:
@@ -201,6 +218,17 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
+
+        # ★
+        if self.count_large >= self.large_frame:
+            self.img_mozi = self.fonto.render("爆弾スキルOK！", 0, (255, 0, 0))
+            screen.blit(self.img_mozi, self.rct_mozi)
+        else:
+            self.img_mozi = self.fonto.render("まだ！", 0, (255, 0, 0))
+            screen.blit(self.img_mozi, self.rct_mozi)
+
+
+
 
 
 class Score:
@@ -259,17 +287,17 @@ def main():
     expls = []
     limit = Limit()
     tmr = 0
-    count_large = 0  # ★ 爆弾の大きさ変更スキル発動 使用frameカウント
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-            if event.type == pg.KEYDOWN and event.key == pg.K_j and count_large >=400:  # ★
+            if event.type == pg.KEYDOWN and event.key == pg.K_j and bomb.count_large >=bomb.large_frame:  # ★
+                # 2つのモード
                 # bomb.resize(bomb.rad * 2)  # 倍率の場合（押すたびに変化）
                 bomb.resize(50)  # 固定の大きさの場合
-                count_large = 0
+                bomb.count_large = 0
 
-        if count_large == 200:  # ★ 4秒(200frame)でボールが元に戻る
+        if bomb.count_large == 200:  # ★ 4秒(200frame)でボールが元に戻る
             bomb.resize(10)
 
         screen.blit(bg_img, [0, 0])
@@ -297,7 +325,7 @@ def main():
         limit.update(screen)
         pg.display.update()
         tmr += 1
-        count_large += 1  # ★
+        bomb.count_large += 1  # ★
         clock.tick(50)
 
 
