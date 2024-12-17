@@ -6,8 +6,8 @@ import time
 import pygame as pg
 
 
-WIDTH = 500  # ゲームウィンドウの幅
-HEIGHT = 500  # ゲームウィンドウの高さ
+WIDTH = 800  # ゲームウィンドウの幅
+HEIGHT = 600  # ゲームウィンドウの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -222,16 +222,43 @@ class Limit:
         self.img = self.fonto.render(f"制限時間：{self.time}", 0, (0, 0, 255))
         screen.blit(self.img, self.rct)
 
+class Goal:
+    """
+    ゴールを描画するクラス
+    """
+    def __init__(self, xy: tuple[int, int], width: int, height: int, color: tuple[int, int, int]):
+        """
+        引数:
+        xy     : ゴールの左上座標 (x, y)
+        width  : ゴールの幅
+        height : ゴールの高さ
+        color  : ゴールの色 (RGBタプル)
+        """
+        self.img = pg.Surface((width, height))  # ゴールのサイズを定義
+        self.img.fill(color)  # 色を塗る
+        self.rct = self.img.get_rect()
+        self.rct.topleft = xy  # 左上座標を設定
+
+    def update(self, screen: pg.Surface):
+        """
+        ゴールを画面に描画する
+        引数:
+        screen : 画面Surface
+        """
+        screen.blit(self.img, self.rct)
+
 
 def main():
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
-    bird = Bird((WIDTH-100, HEIGHT-250))
-    bird2 = Bird2((100, 250))
+    bird = Bird((WIDTH-100, HEIGHT-(HEIGHT/2)))
+    bird2 = Bird2((100, HEIGHT/2))
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    goal = Goal((WIDTH-10, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
+    goal2 = Goal((0, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     clock = pg.time.Clock()
     score = Score()
     expls = []
@@ -242,6 +269,25 @@ def main():
             if event.type == pg.QUIT:
                 return
         screen.blit(bg_img, [0, 0])
+
+        goal.update(screen)
+        goal2.update(screen) 
+
+        # こうかとんがゴールに到達したか判定
+        if bomb.rct.colliderect(goal.rct):
+            fonto = pg.font.Font(None, 80)
+            txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+            screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+            pg.display.update()
+            time.sleep(2)
+            return
+        if bomb.rct.colliderect(goal2.rct):
+            fonto = pg.font.Font(None, 80)
+            txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+            screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+            pg.display.update()
+            time.sleep(2)
+            return
         
         if limit.time == 0:
             fonto = pg.font.Font(None, 80)
