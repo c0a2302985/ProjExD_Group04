@@ -6,8 +6,8 @@ import time
 import pygame as pg
 
 
-WIDTH = 500  # ゲームウィンドウの幅
-HEIGHT = 500  # ゲームウィンドウの高さ
+WIDTH = 800  # ゲームウィンドウの幅
+HEIGHT = 600  # ゲームウィンドウの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -160,12 +160,34 @@ class Bomb:
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
         """
+        self.color = color  # ★
+        self.rad = rad  # ★
         self.img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.img, color, (rad, rad), rad)
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
+
+    def resize(self, factor: float):  # ★
+        """
+        爆弾の大きさを変更する
+        引数 factor: 爆弾の半径（変更後の）
+        """
+        self.rad = factor
+        self.img = pg.Surface((2 * self.rad, 2 * self.rad))
+        pg.draw.circle(self.img, self.color, (self.rad, self.rad), self.rad)
+        self.img.set_colorkey((0, 0, 0))
+        self.rct = self.img.get_rect(center=self.rct.center)
+
+        if self.rct.left < 0:
+            self.rct.left = 0
+        if self.rct.right > WIDTH:
+            self.rct.right = WIDTH
+        if self.rct.top < 0:
+            self.rct.top = 0
+        if self.rct.bottom > HEIGHT:
+            self.rct.bottom = HEIGHT
 
     def update(self, screen: pg.Surface):
         """
@@ -228,8 +250,8 @@ def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
-    bird = Bird((WIDTH-100, HEIGHT-250))
-    bird2 = Bird2((100, 250))
+    bird = Bird((WIDTH-100, HEIGHT-(HEIGHT/2)))
+    bird2 = Bird2((100, HEIGHT/2))    
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
@@ -237,10 +259,19 @@ def main():
     expls = []
     limit = Limit()
     tmr = 0
+    count_large = 0  # ★ 爆弾の大きさ変更スキル発動 使用frameカウント
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
+            if event.type == pg.KEYDOWN and event.key == pg.K_j and count_large >=400:  # ★
+                # bomb.resize(bomb.rad * 2)  # 倍率の場合（押すたびに変化）
+                bomb.resize(50)  # 固定の大きさの場合
+                count_large = 0
+
+        if count_large == 200:  # ★ 4秒(200frame)でボールが元に戻る
+            bomb.resize(10)
+
         screen.blit(bg_img, [0, 0])
         
         if limit.time == 0:
@@ -266,6 +297,7 @@ def main():
         limit.update(screen)
         pg.display.update()
         tmr += 1
+        count_large += 1  # ★
         clock.tick(50)
 
 
