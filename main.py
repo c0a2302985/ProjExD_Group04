@@ -6,8 +6,8 @@ import time
 import pygame as pg
 
 
-WIDTH = 500  # ゲームウィンドウの幅
-HEIGHT = 500  # ゲームウィンドウの高さ
+WIDTH = 800  # ゲームウィンドウの幅
+HEIGHT = 600  # ゲームウィンドウの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -154,7 +154,7 @@ class Bomb:
     """
     爆弾に関するクラス
     """
-    def __init__(self, color: tuple[int, int, int], rad: int):
+    def __init__(self, color: tuple[int, int, int], rad: int,score_value=1):
         """
         引数に基づき爆弾円Surfaceを生成する
         引数1 color：爆弾円の色タプル
@@ -166,6 +166,7 @@ class Bomb:
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
+        self.score_value = score_value
 
     def update(self, screen: pg.Surface):
         """
@@ -182,17 +183,16 @@ class Bomb:
 
 
 class Score:
-    def __init__(self):
+    def __init__(self, position: tuple[int, int]):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
         self.score = 0
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        self.rct = self.img.get_rect()
-        self.rct.center = (100, HEIGHT-50)
+        self.position = position
 
     def update(self, screen):
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        screen.blit(self.img, self.rct)
-
+        img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
+        rct = img.get_rect()
+        rct.center = self.position
+        screen.blit(img, rct)
 
 class Explosion:
     def __init__(self, bomb: Bomb):
@@ -233,7 +233,8 @@ def main():
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
-    score = Score()
+    score_left = Score((100, HEIGHT-50))
+    score_right = Score((WIDTH-100, HEIGHT-50))
     expls = []
     limit = Limit()
     tmr = 0
@@ -257,7 +258,24 @@ def main():
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-        score.update(screen)
+            if bomb.rct.left < 0:
+                    score_right.score += bomb.score_value
+                    bombs.remove(bomb)
+                    # 10%の確率で金色の玉を生成
+                    if random.random() < 0.1:
+                        bombs.append(Bomb((46, 74, 83), 10, score_value=2))  # 金色の玉
+                    else:
+                        bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
+            elif bomb.rct.right > WIDTH:
+                score_left.score += bomb.score_value
+                bombs.remove(bomb)
+            # 10%の確率で金色の玉を生成
+                if random.random() < 0.1:
+                    bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
+                else:
+                    bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
+        score_left.update(screen)
+        score_right.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
