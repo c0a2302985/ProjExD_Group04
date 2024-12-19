@@ -5,9 +5,10 @@ import sys
 import time
 import pygame as pg
 
-
 WIDTH = 500  # ゲームウィンドウの幅
 HEIGHT = 500  # ゲームウィンドウの高さ
+GOAL_WIDTH = 50  # ゴールの幅
+GOAL_HEIGHT = 100  # ゴールの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -57,6 +58,7 @@ class Bird:
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
         self.dire = (+5, 0)
+        self.frozen = False  # 凍結状態を示すフラグ
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -73,6 +75,10 @@ class Bird:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        if self.frozen:
+            screen.blit(self.img, self.rct)  # 凍結中はその場に留まる
+            return  # 凍結中は操作を受け付けない
+
         sum_mv = [0, 0]
         for k, mv in __class__.delta.items():
             if key_lst[k]:
@@ -119,6 +125,7 @@ class Bird2:
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
         self.dire = (+5, 0)
+        self.frozen = False  # 凍結状態を示すフラグ
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -135,6 +142,10 @@ class Bird2:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        if self.frozen:
+            screen.blit(self.img, self.rct)  # 凍結中はその場に留まる
+            return  # 凍結中は操作を受け付けない
+
         sum_mv = [0, 0]
         for k, mv in __class__.delta.items():
             if key_lst[k]:
@@ -147,18 +158,19 @@ class Bird2:
             self.img = __class__.imgs[tuple(sum_mv)]
         screen.blit(self.img, self.rct)
         if sum_mv != [0, 0]:
-            self.dire = (sum_mv[0], sum_mv[1])   
+            self.dire = (sum_mv[0], sum_mv[1])
 
 
 class Bomb:
     """
     爆弾に関するクラス
     """
-    def __init__(self, color: tuple[int, int, int], rad: int):
+    def __init__(self, color: tuple[int, int, int], rad: int, score_value=1):
         """
         引数に基づき爆弾円Surfaceを生成する
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
+        引数3 score_value：爆弾のスコア値
         """
         self.img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.img, color, (rad, rad), rad)
@@ -166,6 +178,7 @@ class Bomb:
         self.rct = self.img.get_rect()
         self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
+        self.score_value = score_value
 
     def update(self, screen: pg.Surface):
         """
@@ -182,16 +195,16 @@ class Bomb:
 
 
 class Score:
-    def __init__(self):
+    def __init__(self, position: tuple[int, int]):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
         self.score = 0
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        self.rct = self.img.get_rect()
-        self.rct.center = (100, HEIGHT-50)
+        self.position = position
 
     def update(self, screen):
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        screen.blit(self.img, self.rct)
+        img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
+        rct = img.get_rect()
+        rct.center = self.position
+        screen.blit(img, rct)
 
 
 class Explosion:
@@ -223,6 +236,22 @@ class Limit:
         screen.blit(self.img, self.rct)
 
 
+class Freeze:
+    def __init__(self, duration: int):
+        self.duration = duration
+        self.timer = 0
+
+    def update(self):
+        if self.timer > 0:
+            self.timer -= 1
+
+    def activate(self):
+        self.timer = self.duration
+
+    def is_active(self):
+        return self.timer > 0
+
+
 def main():
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
@@ -230,13 +259,20 @@ def main():
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((WIDTH-100, HEIGHT-250))
     bird2 = Bird2((100, 250))
-    bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
-    score = Score()
+    score_left = Score((100, HEIGHT-50))
+    score_right = Score((WIDTH-100, HEIGHT-50))
     expls = []
     limit = Limit()
+    freeze_bird = Freeze(300)  # 5秒間凍結
+    freeze_bird2 = Freeze(300)  # 5秒間凍結
     tmr = 0
+
+    # ゴールの設定
+    left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -252,12 +288,45 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
+        if key_lst[pg.K_1]:
+            freeze_bird.activate()
+        if key_lst[pg.K_0]:
+            freeze_bird2.activate()
+
+        freeze_bird.update()
+        freeze_bird2.update()
+
+        bird.frozen = freeze_bird.is_active()
+        bird2.frozen = freeze_bird2.is_active()
+
         bird.update(key_lst, screen)
         bird2.update(key_lst, screen)
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-        score.update(screen)
+            if left_goal.colliderect(bomb.rct):
+                score_right.score += bomb.score_value
+                bombs.remove(bomb)
+                # 10%の確率で金色の玉を生成
+                if random.random() < 0.1:
+                    bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
+                else:
+                    bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
+            elif right_goal.colliderect(bomb.rct):
+                score_left.score += bomb.score_value
+                bombs.remove(bomb)
+                # 10%の確率で金色の玉を生成
+                if random.random() < 0.1:
+                    bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
+                else:
+                    bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
+
+        # ゴールの描画
+        pg.draw.rect(screen, (0, 255, 0), left_goal)
+        pg.draw.rect(screen, (0, 0, 255), right_goal)
+
+        score_left.update(screen)
+        score_right.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
