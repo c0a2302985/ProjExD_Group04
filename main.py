@@ -9,7 +9,7 @@ import pygame as pg
 WIDTH = 800  # ゲームウィンドウの幅
 HEIGHT = 600  # ゲームウィンドウの高さ
 GOAL_WIDTH = 10  # ゴールの幅
-GOAL_HEIGHT = 600  # ゴールの高さ
+GOAL_HEIGHT = 100  # ゴールの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
