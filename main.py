@@ -280,8 +280,8 @@ def main():
                     bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
 
         # ゴールの描画
-        pg.draw.rect(screen, (0, 255, 0), left_goal)
-        pg.draw.rect(screen, (0, 0, 255), right_goal)
+        pg.draw.rect(screen, (0, 255, 0), left_goal)#左
+        pg.draw.rect(screen, (0, 0, 255), right_goal)#右
 
         score_left.update(screen)
         score_right.update(screen)
