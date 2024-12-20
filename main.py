@@ -225,11 +225,11 @@ class Limit:
 
 def check_coll(bomb: Bomb, bird: Bird) -> None:
     """
-    爆弾と鳥の衝突処理を行う関数
+    爆弾とこうかとんの衝突処理を行う関数
 
     引数:
         bomb (Bomb): 衝突対象の爆弾オブジェクト
-        bird (Bird): 衝突対象の鳥オブジェクト（Bird またはそのサブクラス）
+        bird (Bird): 衝突対象のこうかとんオブジェクト
 
     戻り値:
         None
