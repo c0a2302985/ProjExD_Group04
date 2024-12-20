@@ -6,8 +6,8 @@ import time
 import pygame as pg
 
 
-WIDTH = 500  # ゲームウィンドウの幅
-HEIGHT = 500  # ゲームウィンドウの高さ
+WIDTH = 800  # ゲームウィンドウの幅
+HEIGHT = 600  # ゲームウィンドウの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -223,13 +223,35 @@ class Limit:
         screen.blit(self.img, self.rct)
 
 
+def check_coll(bomb: Bomb, bird: Bird) -> None:
+    """
+    爆弾と鳥の衝突処理を行う関数
+
+    引数:
+        bomb (Bomb): 衝突対象の爆弾オブジェクト
+        bird (Bird): 衝突対象の鳥オブジェクト（Bird またはそのサブクラス）
+
+    戻り値:
+        None
+    """
+    hit_margin = 10
+    if abs(bomb.rct.bottom - bird.rct.top) < hit_margin and bomb.vy > 0:
+        bomb.vy *= -1
+    elif abs(bomb.rct.top - bird.rct.bottom) < hit_margin and bomb.vy < 0:
+        bomb.vy *= -1
+    elif abs(bomb.rct.left -bird.rct.right) < hit_margin and bomb.vx < 0:
+        bomb.vx *= -1
+    elif abs(bomb.rct.right - bird.rct.left) < hit_margin and bomb.vx > 0:
+        bomb.vx *= -1
+
+
 def main():
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
-    bird = Bird((WIDTH-100, HEIGHT-250))
-    bird2 = Bird2((100, 250))
+    bird = Bird((WIDTH-100, HEIGHT/2))
+    bird2 = Bird2((100, HEIGHT/2))
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
@@ -250,6 +272,16 @@ def main():
             pg.display.update()
             time.sleep(1)
             return
+        
+        # 爆弾とこうかとん1の衝突判定
+        for bomb in bombs:
+            if bird.rct.colliderect(bomb.rct):
+                check_coll(bomb, bird)
+
+        # 爆弾とこうかとん2の衝突判定
+        for bomb in bombs:
+            if bird2.rct.colliderect(bomb.rct):
+                check_coll(bomb, bird2)
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
