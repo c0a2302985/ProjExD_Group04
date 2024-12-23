@@ -235,18 +235,66 @@ class Goal:
         height : ゴールの高さ
         color  : ゴールの色 (RGBタプル)
         """
-        self.img = pg.Surface((width, height))  # ゴールのサイズを定義
-        self.img.fill(color)  # 色を塗る
+
+        self.base_color = color  # 初期色
+        self.color = color  # 現在の色
+        self.base_height = height  # 初期幅
+        self.width = width  
+        self.height = height  # 現在の幅
+        self.img = pg.Surface((self.width, self.height))
+        self.img.fill(self.color)
         self.rct = self.img.get_rect()
-        self.rct.topleft = xy  # 左上座標を設定
+        self.rct.topleft = xy
+        self.timer = {"color": 0, "size": 0}  # スキルタイマーの管理
+
+    def skill_effect(self, duration: int, color: tuple[int, int, int] = None, reduce_height: bool = False):
+        """
+        ゴールの色を変更し、必要に応じて幅を変更する。
+        duration: 効果の継続時間
+        color: 新しい色
+        reduce_width: 幅を変更する場合はTrue
+        """
+        if color:
+            self.timer["color"] = duration
+            self.color = color
+        if reduce_height:
+            self.timer["size"] = duration
+            self.height = self.base_height // 2
 
     def update(self, screen: pg.Surface):
         """
         ゴールを画面に描画する
-        引数:
+        タイマー更新
         screen : 画面Surface
         """
+        for effect, time_left in self.timer.items():
+            if time_left > 0:
+                self.timer[effect] -= 1
+                if self.timer[effect] == 0:  # 効果終了時に元の状態に戻す
+                    if effect == "color":
+                        self.color = self.base_color
+                    elif effect == "size":
+                        self.height = self.base_height
+
+        self.img = pg.Surface((self.width, self.height))
+        self.img.fill(self.color)
+        self.rct.height = self.height  # ゴール高さの更新
         screen.blit(self.img, self.rct)
+        
+class GoalState:
+    """
+    ゲーム全体の状態を管理するクラス
+    """
+    def __init__(self):
+        self.scores = {"player1": 0, "player2": 0}  # プレイヤーごとのスコア
+        self.cooldowns = {
+            "color_p1": 0, "color_p2": 0,
+            "size_p1": 0, "size_p2": 0,
+        }  # 各プレイヤーのクールダウン
+    def update(self):
+        for key in self.cooldowns:
+            if self.cooldowns[key] > 0:
+                self.cooldowns[key] -= 1
 
 
 def main():
@@ -258,41 +306,44 @@ def main():
     bird2 = Bird2((100, HEIGHT/2))
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
-    goal = Goal((WIDTH-10, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
+    goal1 = Goal((WIDTH-10, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     goal2 = Goal((0, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     clock = pg.time.Clock()
-    score = Score()
+    #score = Score()
+    goal_state = GoalState()  # ゲーム状態の管理
     expls = []
     limit = Limit()
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
         screen.blit(bg_img, [0, 0])
 
-        goal.update(screen)
+        goal1.update(screen)
         goal2.update(screen) 
 
-        # ゴールに到達したか判定
-        if bomb.rct.colliderect(goal.rct):
-            score.score += 1  # 1点アップ
-            bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
-            # fonto = pg.font.Font(None, 80)
-            # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-            # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-            # pg.display.update()
-            time.sleep(2)
-            # return
-        if bomb.rct.colliderect(goal2.rct):
-            score.score += 1  # 1点アップ
-            bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
-            # fonto = pg.font.Font(None, 80)
-            # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-            # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-            # pg.display.update()
-            time.sleep(2)
-            # return
+        #ゴール実装初期
+        # # ゴールに到達したか判定
+        # if bomb.rct.colliderect(goal.rct):
+        #     score.score += 1  # 1点アップ
+        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+        #     # fonto = pg.font.Font(None, 80)
+        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+        #     # pg.display.update()
+        #     time.sleep(2)
+        #     # return
+        # if bomb.rct.colliderect(goal2.rct):
+        #     score.score += 1  # 1点アップ
+        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+        #     # fonto = pg.font.Font(None, 80)
+        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+        #     # pg.display.update()
+        #     time.sleep(2)
+        #     # return
         
         if limit.time == 0:
             fonto = pg.font.Font(None, 80)
@@ -303,15 +354,52 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
+
+        # プレイヤー1のスキル（0: 色変更、9: 高さ縮小）
+        if key_lst[pg.K_0] and goal_state.cooldowns["color_p1"] == 0:
+            goal1.skill_effect(10 * 50, (255, 255, 0))
+            goal_state.cooldowns["color_p1"] = 20 * 50
+        if key_lst[pg.K_9] and goal_state.cooldowns["size_p1"] == 0:
+            goal1.skill_effect(10 * 50, reduce_height=True)
+            goal_state.cooldowns["size_p1"] = 15 * 50
+
+        # プレイヤー2のスキル（1: 色変更、2: 高さ縮小）
+        if key_lst[pg.K_1] and goal_state.cooldowns["color_p2"] == 0:
+            goal2.skill_effect(10 * 50, (255, 255, 0))
+            goal_state.cooldowns["color_p2"] = 20 * 50
+        if key_lst[pg.K_2] and goal_state.cooldowns["size_p2"] == 0:
+            goal2.skill_effect(10 * 50, reduce_height=True)
+            goal_state.cooldowns["size_p2"] = 15 * 50
+
+        # ボールがゴールに到達した場合の処理
+        if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
+            goal_state.scores["player1"] += 1
+            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            time.sleep(1)  # 一時停止（動作確認用）
+
+        if bomb.rct.colliderect(goal2.rct) and goal2.timer["color"] == 0:
+            goal_state.scores["player2"] += 1
+            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            time.sleep(1)  # 一時停止（動作確認用）
+
         bird.update(key_lst, screen)
         bird2.update(key_lst, screen)
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-        score.update(screen)
+
+        # スコアの表示更新
+        font = pg.font.Font(None, 40)
+        p1_score_text = font.render(f"P1 Score: {goal_state.scores['player1']}", True, (0, 0, 255))
+        p2_score_text = font.render(f"P2 Score: {goal_state.scores['player2']}", True, (255, 0, 0))
+        screen.blit(p1_score_text, (WIDTH - 200, HEIGHT - 50))
+        screen.blit(p2_score_text, (10, HEIGHT - 50))
+        #score.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
+        # タイマーの更新
+        goal_state.update()
         if (tmr != 0) and (tmr % 50 == 0):
             limit.time -= 1
         limit.update(screen)
