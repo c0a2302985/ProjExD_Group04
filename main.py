@@ -9,6 +9,7 @@ WIDTH = 500  # ゲームウィンドウの幅
 HEIGHT = 500  # ゲームウィンドウの高さ
 GOAL_WIDTH = 50  # ゴールの幅
 GOAL_HEIGHT = 100  # ゴールの高さ
+SP_COST = 5  # 氷結スキルの消費SP
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -93,6 +94,7 @@ class Bird:
         if sum_mv != [0, 0]:
             self.dire = (sum_mv[0], sum_mv[1])
 
+
 class Bird2:
     """
     ゲームキャラクター（こうかとん）に関するクラス
@@ -161,6 +163,8 @@ class Bird2:
             self.dire = (sum_mv[0], sum_mv[1])
 
 
+
+
 class Bomb:
     """
     爆弾に関するクラス
@@ -207,6 +211,24 @@ class Score:
         screen.blit(img, rct)
 
 
+class SP:
+    """SPに関するクラス"""
+    def __init__(self, position: tuple[int, int]):
+        """
+        fontoで表示するためのフォントを設定
+        spはスキルポイント。初期値は0
+        positionはspの表示位置"""
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.sp = 0
+        self.position = position
+
+    def update(self, screen):
+        img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
+        rct = img.get_rect()
+        rct.center = self.position
+        screen.blit(img, rct)
+
+
 class Explosion:
     def __init__(self, bomb: Bomb):
         self.img1 = pg.image.load(f"fig/explosion.gif")
@@ -237,18 +259,32 @@ class Limit:
 
 
 class Freeze:
+    """停止スキルに関するクラス"""
     def __init__(self, duration: int):
+        """
+        durationは凍結の持続時間を指定する
+        timerは停止時間のカウント。初期値は0
+        """
         self.duration = duration
         self.timer = 0
 
     def update(self):
+        """
+        timerの数字を1づつ減らしていく
+        """
         if self.timer > 0:
             self.timer -= 1
 
     def activate(self):
+        """
+        停止状態を開始する
+        """
         self.timer = self.duration
 
     def is_active(self):
+        """
+        停止状態かのチェック
+        """
         return self.timer > 0
 
 
@@ -263,6 +299,8 @@ def main():
     clock = pg.time.Clock()
     score_left = Score((100, HEIGHT-50))
     score_right = Score((WIDTH-100, HEIGHT-50))
+    sp_left = SP((100, HEIGHT-100))
+    sp_right = SP((WIDTH-100, HEIGHT-100))
     expls = []
     limit = Limit()
     freeze_bird = Freeze(300)  # 5秒間凍結
@@ -288,10 +326,12 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
-        if key_lst[pg.K_1]:
+        if key_lst[pg.K_1] and sp_left.sp >= SP_COST:
             freeze_bird.activate()
-        if key_lst[pg.K_0]:
+            sp_left.sp -= SP_COST #コストを消費
+        if key_lst[pg.K_0] and sp_right.sp >= SP_COST:
             freeze_bird2.activate()
+            sp_right.sp -= SP_COST#コストを消費
 
         freeze_bird.update()
         freeze_bird2.update()
@@ -306,20 +346,13 @@ def main():
             bomb.update(screen)
             if left_goal.colliderect(bomb.rct):
                 score_right.score += bomb.score_value
+                sp_left.sp += 1  # ゴールされた側のSPを増やす
                 bombs.remove(bomb)
-                # 10%の確率で金色の玉を生成
-                if random.random() < 0.1:
-                    bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
-                else:
-                    bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
             elif right_goal.colliderect(bomb.rct):
                 score_left.score += bomb.score_value
+                sp_right.sp += 1  # ゴールされた側のSPを増やす
                 bombs.remove(bomb)
-                # 10%の確率で金色の玉を生成
-                if random.random() < 0.1:
-                    bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
-                else:
-                    bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
+
 
         # ゴールの描画
         pg.draw.rect(screen, (0, 255, 0), left_goal)
@@ -327,11 +360,16 @@ def main():
 
         score_left.update(screen)
         score_right.update(screen)
+        sp_left.update(screen)
+        sp_right.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
         if (tmr != 0) and (tmr % 50 == 0):
             limit.time -= 1
+        if (tmr != 0) and (tmr % 150 == 0):  # 3秒ごとにSPを増やす
+            sp_left.sp += 1
+            sp_right.sp += 1
         limit.update(screen)
         pg.display.update()
         tmr += 1
