@@ -304,10 +304,48 @@ class GoalState:
             "color_p1": 0, "color_p2": 0,
             "size_p1": 0, "size_p2": 0,
         }  # 各プレイヤーのクールダウン
+        self.skill_names = {  # スキル名を定義
+            "color_p1": "ゴール無敵",
+            "size_p1": "幅縮小",
+            "color_p2": "ゴール変更",
+            "size_p2": "幅縮小",
+        }
     def update(self):
         for key in self.cooldowns:
             if self.cooldowns[key] > 0:
                 self.cooldowns[key] -= 1
+
+def draw_skill_status(screen, goal_state: GoalState, font):
+    """
+    スキルの状態を描画する
+    screen: 描画する画面Surface
+    goal_state: GoalStateオブジェクト
+    font: フォントオブジェクト
+    """
+    # プレイヤー1のスキル表示位置
+    p1_base_x, p1_base_y = WIDTH - 200, 100
+    # プレイヤー2のスキル表示位置
+    p2_base_x, p2_base_y = 10, 100
+
+    for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
+        for skill in ["color", "size"]:
+            key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
+            skill_name = goal_state.skill_names[key]
+            cooldown = goal_state.cooldowns[key]
+
+            # 状態テキストの生成
+            if cooldown == 0:
+                status_text = f"{skill_name}: スキル使用可能"
+                color = (0, 255, 0)  # 使用可能の色: 緑
+            else:
+                status_text = f"{skill_name}: クールダウン中({cooldown // 50:.1f}s)"
+                color = (255, 0, 0)  # クールダウン中の色: 赤
+
+            # 描画
+            font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
+            skill_text = font.render(status_text, True, color)
+            screen.blit(skill_text, (base_x, base_y))
+            base_y += 30  # 次のスキル用に行を下げる
 
 
 def main():
@@ -327,6 +365,10 @@ def main():
     expls = []
     limit = Limit()
     tmr = 0
+    # # フォント設定（日本語対応フォントを指定）
+    # font_path = "C:/Windows/Fonts/msgothic.ttc"  # 日本語対応フォント
+    # font = pg.font.Font(font_path, 30)  # フォントサイズ30
+    font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
 
     while True:
         for event in pg.event.get():
@@ -383,6 +425,9 @@ def main():
         if key_lst[pg.K_2] and goal_state.cooldowns["size_p2"] == 0:
             goal2.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p2"] = 15 * 50
+
+        # スキル状態を描画
+        draw_skill_status(screen, goal_state, font)
 
         # ボールがゴールに到達した場合の処理
         if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
