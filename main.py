@@ -323,7 +323,7 @@ def draw_skill_status(screen, goal_state: GoalState, font):
     font: フォントオブジェクト
     """
     # プレイヤー1のスキル表示位置
-    p1_base_x, p1_base_y = WIDTH - 200, 100
+    p1_base_x, p1_base_y = WIDTH - 300, 100
     # プレイヤー2のスキル表示位置
     p2_base_x, p2_base_y = 10, 100
 
