@@ -228,9 +228,6 @@ class Bomb:
             screen.blit(self.img_mozi, self.rct_mozi)
 
 
-
-
-
 class Score:
     def __init__(self):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
@@ -291,13 +288,13 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-            if event.type == pg.KEYDOWN and event.key == pg.K_j and bomb.count_large >=bomb.large_frame:  # ★
+            if event.type == pg.KEYDOWN and event.key == pg.K_j and bomb.count_large >= bomb.large_frame:  # キー（０）を押したときに
                 # 2つのモード
                 # bomb.resize(bomb.rad * 2)  # 倍率の場合（押すたびに変化）
                 bomb.resize(50)  # 固定の大きさの場合
                 bomb.count_large = 0
 
-        if bomb.count_large == 200:  # ★ 4秒(200frame)でボールが元に戻る
+        if bomb.count_large == 200:  # 4秒(200frame)でボールが元に戻る
             bomb.resize(10)
 
         screen.blit(bg_img, [0, 0])
@@ -325,7 +322,7 @@ def main():
         limit.update(screen)
         pg.display.update()
         tmr += 1
-        bomb.count_large += 1  # ★
+        bomb.count_large += 1  # frameカウント_爆弾大きさスキル用
         clock.tick(50)
 
 
