@@ -259,7 +259,14 @@ class Goal:
             self.color = color
         if reduce_height:
             self.timer["size"] = duration
+            # 中心座標を保持したまま高さを変更
+            old_center = self.rct.center
             self.height = self.base_height // 2
+            self.img = pg.Surface((self.width, self.height))  # 新しい高さのSurfaceを作成
+            self.img.fill(self.color)
+            self.rct = self.img.get_rect()  # 新しいRectを取得
+            self.rct.center = old_center  # 中心を元の位置に戻す
+
 
     def update(self, screen: pg.Surface):
         """
@@ -274,7 +281,13 @@ class Goal:
                     if effect == "color":
                         self.color = self.base_color
                     elif effect == "size":
+                        # 高さを元に戻し、中心座標を保持する
+                        old_center = self.rct.center
                         self.height = self.base_height
+                        self.img = pg.Surface((self.width, self.height))  # 元の高さのSurfaceを作成
+                        self.img.fill(self.color)
+                        self.rct = self.img.get_rect()  # 元のRectを取得
+                        self.rct.center = old_center  # 中心を元の位置に戻す
 
         self.img = pg.Surface((self.width, self.height))
         self.img.fill(self.color)
