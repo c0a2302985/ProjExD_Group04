@@ -286,7 +286,7 @@ class Bomb:
     #     # img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
     #     # rct = img.get_rect()
     #     # rct.center = self.position
-    #     # screen.blit(img, rct)
+    #     # screen.blit(img, rct)-@ 
 
 
 class Explosion:
@@ -652,11 +652,11 @@ def check_bird_coll_with_wall(bird: Bird, wall: Wall) -> None:
         elif bird.rct.left < wall.rct.right and bird.dire[0] < 0:
             bird.rct.left = wall.rct.right
         # 壁の上側から衝突した場合
-        if bird.rct.bottom > wall.rct.top and bird.dire[1] > 0:
-            bird.rct.bottom = wall.rct.top
-        # 壁の下側から衝突した場合
-        elif bird.rct.top < wall.rct.bottom and bird.dire[1] < 0:
-            bird.rct.top = wall.rct.bottom
+        # if bird.rct.bottom > wall.rct.top and bird.dire[1] > 0:
+        #     bird.rct.bottom = wall.rct.top
+        # # 壁の下側から衝突した場合
+        # elif bird.rct.top < wall.rct.bottom and bird.dire[1] < 0:
+        #     bird.rct.top = wall.rct.bottom
 
 def main():
     NUM_OF_BOMBS = 1
@@ -745,9 +745,14 @@ def main():
         #     # pg.display.update()
         #     time.sleep(2)
         #     # return
-        if limit.time == 0:
+        if limit.time == 0:  # 結果発表
             fonto = pg.font.Font(None, 80)
-            txt = fonto.render("end", True, (255, 0, 0))
+            if goal_state.scores["player1"] < goal_state.scores["player2"]:
+                txt = fonto.render("1P WIN", True, (0, 0, 255))
+            if goal_state.scores["player1"] > goal_state.scores["player2"]:
+                txt = fonto.render("2P WIN", True, (255, 0, 0))
+            if goal_state.scores["player1"] == goal_state.scores["player2"]:
+                txt = fonto.render("DRAW", True, (255, 0, 255))
             screen.blit(txt, [WIDTH//2-80, HEIGHT//2])
             pg.display.update()
             time.sleep(1)
