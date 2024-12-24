@@ -8,8 +8,8 @@ import pygame as pg
 
 WIDTH = 800  # ゲームウィンドウの幅
 HEIGHT = 600  # ゲームウィンドウの高さ
-GOAL_WIDTH = 10  # ゴールの幅
-GOAL_HEIGHT = 100  # ゴールの高さ
+# GOAL_WIDTH = 10  # ゴールの幅
+# GOAL_HEIGHT = 100  # ゴールの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -237,8 +237,8 @@ def main():
     clock = pg.time.Clock()
     score_left = Score((100, HEIGHT-50))
     score_right = Score((WIDTH-100, HEIGHT-50))
-    left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
-    right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
     expls = []
     limit = Limit()
     tmr = 0
@@ -262,7 +262,7 @@ def main():
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-            if left_goal.colliderect(bomb.rct): #左側のゴールに入ったら
+            if goal1.colliderect(bomb.rct): #左側のゴールに入ったら
                 score_right.score += bomb.score_value
                 bombs.remove(bomb)
                 # 10%の確率で金色の玉を生成
@@ -270,7 +270,7 @@ def main():
                     bombs.append(Bomb((255, 215, 0), 10, score_value=2))  # 金色の玉
                 else:
                     bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
-            elif right_goal.colliderect(bomb.rct): #右側のゴールに入ったら
+            elif goal2.colliderect(bomb.rct): #右側のゴールに入ったら
                 score_left.score += bomb.score_value
                 bombs.remove(bomb)
                 # 10%の確率で金色の玉を生成
@@ -279,12 +279,12 @@ def main():
                 else:
                     bombs.append(Bomb((255, 0, 0), 10))  # 赤色の玉
 
-        # ゴールの描画
-        pg.draw.rect(screen, (0, 255, 0), left_goal)#左
-        pg.draw.rect(screen, (0, 0, 255), right_goal)#右
+        # # ゴールの描画
+        # pg.draw.rect(screen, (0, 255, 0), left_goal)#左
+        # pg.draw.rect(screen, (0, 0, 255), right_goal)#右
 
-        score_left.update(screen)
-        score_right.update(screen)
+        # score_left.update(screen)
+        # score_right.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
