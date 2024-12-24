@@ -288,7 +288,7 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-            if event.type == pg.KEYDOWN and event.key == pg.K_j and bomb.count_large >= bomb.large_frame:  # キー（０）を押したときに
+            if event.type == pg.KEYDOWN and event.key == pg.K_0 and bomb.count_large >= bomb.large_frame:  # キー（０）を押したときに
                 # 2つのモード
                 # bomb.resize(bomb.rad * 2)  # 倍率の場合（押すたびに変化）
                 bomb.resize(50)  # 固定の大きさの場合
