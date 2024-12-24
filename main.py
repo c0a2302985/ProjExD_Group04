@@ -836,12 +836,25 @@ def main():
         # draw_skill_status(screen, goal_state, font)
         # ボールがゴールに到達した場合の処理
         if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
-            goal_state.scores["player1"] += 1
-            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            goal_state.scores["player1"] += bomb.score_value
+            bombs.remove(bomb)
+            if random.random() > 0.1:
+                bombs.append(Bomb((255, 0, 0), 10,score_value=1))
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            else:
+                bombs.append(Bomb((255, 215, 0), 10,score_value=2))
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+
             time.sleep(1)  # 一時停止（動作確認用）
         if bomb.rct.colliderect(goal2.rct) and goal2.timer["color"] == 0:
-            goal_state.scores["player2"] += 1
-            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            goal_state.scores["player2"] += bomb.score_value
+            bombs.remove(bomb)
+            if random.random() > 0.1:
+                bombs.append(Bomb((255, 0, 0), 10,score_value=1))
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            else:
+                bombs.append(Bomb((255, 215, 0), 10,score_value=2))
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
             time.sleep(1)  # 一時停止（動作確認用）
         if key_lst[pg.K_LSHIFT] and left_sp >= SP_COST:
             freeze_bird.activate()
