@@ -235,7 +235,6 @@ class Goal:
         height : ゴールの高さ
         color  : ゴールの色 (RGBタプル)
         """
-
         self.base_color = color  # 初期色
         self.color = color  # 現在の色
         self.base_height = height  # 初期幅
@@ -267,7 +266,6 @@ class Goal:
             self.rct = self.img.get_rect()  # 新しいRectを取得
             self.rct.center = old_center  # 中心を元の位置に戻す
 
-
     def update(self, screen: pg.Surface):
         """
         ゴールを画面に描画する
@@ -288,7 +286,6 @@ class Goal:
                         self.img.fill(self.color)
                         self.rct = self.img.get_rect()  # 元のRectを取得
                         self.rct.center = old_center  # 中心を元の位置に戻す
-
         self.img = pg.Surface((self.width, self.height))
         self.img.fill(self.color)
         self.rct.height = self.height  # ゴール高さの更新
@@ -326,13 +323,11 @@ def draw_skill_status(screen, goal_state: GoalState, font):
     p1_base_x, p1_base_y = WIDTH - 300, 100
     # プレイヤー2のスキル表示位置
     p2_base_x, p2_base_y = 10, 100
-
     for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
         for skill in ["color", "size"]:
             key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
             skill_name = goal_state.skill_names[key]
             cooldown = goal_state.cooldowns[key]
-
             # 状態テキストの生成
             if cooldown == 0:
                 status_text = f"{skill_name}: スキル使用可能"
@@ -340,13 +335,11 @@ def draw_skill_status(screen, goal_state: GoalState, font):
             else:
                 status_text = f"{skill_name}: クールダウン中({cooldown // 50:.1f}s)"
                 color = (255, 0, 0)  # クールダウン中の色: 赤
-
             # 描画
             font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
             skill_text = font.render(status_text, True, color)
             screen.blit(skill_text, (base_x, base_y))
             base_y += 30  # 次のスキル用に行を下げる
-
 
 def main():
     NUM_OF_BOMBS = 1
@@ -375,10 +368,8 @@ def main():
             if event.type == pg.QUIT:
                 return
         screen.blit(bg_img, [0, 0])
-
         goal1.update(screen)
         goal2.update(screen) 
-
         #ゴール実装初期
         # # ゴールに到達したか判定
         # if bomb.rct.colliderect(goal.rct):
@@ -399,7 +390,6 @@ def main():
         #     # pg.display.update()
         #     time.sleep(2)
         #     # return
-        
         if limit.time == 0:
             fonto = pg.font.Font(None, 80)
             txt = fonto.render("end", True, (255, 0, 0))
@@ -407,9 +397,7 @@ def main():
             pg.display.update()
             time.sleep(1)
             return
-
         key_lst = pg.key.get_pressed()
-
         # プレイヤー1のスキル（0: 色変更、9: 高さ縮小）
         if key_lst[pg.K_0] and goal_state.cooldowns["color_p1"] == 0:
             goal1.skill_effect(10 * 50, (255, 255, 0))
@@ -417,7 +405,6 @@ def main():
         if key_lst[pg.K_9] and goal_state.cooldowns["size_p1"] == 0:
             goal1.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p1"] = 15 * 50
-
         # プレイヤー2のスキル（1: 色変更、2: 高さ縮小）
         if key_lst[pg.K_1] and goal_state.cooldowns["color_p2"] == 0:
             goal2.skill_effect(10 * 50, (255, 255, 0))
@@ -425,27 +412,22 @@ def main():
         if key_lst[pg.K_2] and goal_state.cooldowns["size_p2"] == 0:
             goal2.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p2"] = 15 * 50
-
         # スキル状態を描画
         draw_skill_status(screen, goal_state, font)
-
         # ボールがゴールに到達した場合の処理
         if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
             goal_state.scores["player1"] += 1
             bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
             time.sleep(1)  # 一時停止（動作確認用）
-
         if bomb.rct.colliderect(goal2.rct) and goal2.timer["color"] == 0:
             goal_state.scores["player2"] += 1
             bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
             time.sleep(1)  # 一時停止（動作確認用）
-
         bird.update(key_lst, screen)
         bird2.update(key_lst, screen)
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-
         # スコアの表示更新
         font = pg.font.Font(None, 40)
         p1_score_text = font.render(f"P1 Score: {goal_state.scores['player1']}", True, (0, 0, 255))
