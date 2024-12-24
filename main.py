@@ -612,6 +612,51 @@ class Next2: ##
             self.img2 = self.fonto.render(f"0", 0, (0, 0, 0))
             screen.blit(self.img2, self.rct2)
 
+class Wall:
+    """
+    birdのみが通れない壁を表現するクラス
+    """
+    def __init__(self, x: int, width: int, height: int, color: tuple[int, int, int]):
+        """
+        壁の初期化
+        引数:
+        x     : 壁のX座標（左端）
+        width : 壁の幅
+        height: 壁の高さ
+        color : 壁の色 (RGBタプル)
+        """
+        self.color = color
+        self.img = pg.Surface((width, height))
+        self.img.fill(color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (x, HEIGHT // 2)
+
+    def update(self, screen: pg.Surface):
+        """
+        壁を画面に描画
+        """
+        screen.blit(self.img, self.rct)
+
+def check_bird_coll_with_wall(bird: Bird, wall: Wall) -> None:
+    """
+    birdと壁の衝突を判定し、衝突した場合は移動を制限する
+    引数:
+    bird : 壁と衝突判定を行うbird
+    wall : 壁オブジェクト
+    """
+    if bird.rct.colliderect(wall.rct):
+        # 壁の左側から衝突した場合
+        if bird.rct.right > wall.rct.left and bird.dire[0] > 0:
+            bird.rct.right = wall.rct.left
+        # 壁の右側から衝突した場合
+        elif bird.rct.left < wall.rct.right and bird.dire[0] < 0:
+            bird.rct.left = wall.rct.right
+        # 壁の上側から衝突した場合
+        if bird.rct.bottom > wall.rct.top and bird.dire[1] > 0:
+            bird.rct.bottom = wall.rct.top
+        # 壁の下側から衝突した場合
+        elif bird.rct.top < wall.rct.bottom and bird.dire[1] < 0:
+            bird.rct.top = wall.rct.bottom
 
 def main():
     NUM_OF_BOMBS = 1
@@ -624,6 +669,7 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     goal1 = Goal((WIDTH-10, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     goal2 = Goal((0, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
+    wall = Wall(WIDTH // 2, 10, HEIGHT, (128, 128, 128))  # 壁を画面中央に生成
     clock = pg.time.Clock()
     fake1 = None
     fake2 = None
@@ -716,6 +762,11 @@ def main():
         for bomb in bombs:
             if bird2.rct.colliderect(bomb.rct):
                 check_coll(bomb, bird2)
+
+        # birdと壁の衝突判定
+        check_bird_coll_with_wall(bird, wall)
+        check_bird_coll_with_wall(bird2, wall)  # bird2
+ 
         key_lst = pg.key.get_pressed()
         # プレイヤー1のスキル（7: 色変更、8: 高さ縮小）
         if key_lst[pg.K_7] and goal_state.cooldowns["color_p1"] == 0:
@@ -854,14 +905,14 @@ def main():
             if fake1 is not None: ##
                 fake1.update(screen) ##
         
-        if fake2 is not None: ##
+        if fake2 is not None: ##d
             if next2.num == 500: #fakeボール2がでて200フレームたったらfakeボールが消える
                 next2.num = 0 ##
                 fake2 = None #fake2をNoneに戻す
 
             if fake2 is not None: ##
                 fake2.update(screen) ##
-
+        wall.update(screen)
         next1.update(screen) ##
         next2.update(screen) ##
         pg.display.update()
