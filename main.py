@@ -745,9 +745,14 @@ def main():
         #     # pg.display.update()
         #     time.sleep(2)
         #     # return
-        if limit.time == 0:
+        if limit.time == 0:  # 結果発表
             fonto = pg.font.Font(None, 80)
-            txt = fonto.render("end", True, (255, 0, 0))
+            if goal_state.scores["player1"] < goal_state.scores["player2"]:
+                txt = fonto.render("1P WIN", True, (0, 0, 255))
+            if goal_state.scores["player1"] > goal_state.scores["player2"]:
+                txt = fonto.render("2P WIN", True, (255, 0, 0))
+            if goal_state.scores["player1"] == goal_state.scores["player2"]:
+                txt = fonto.render("DRAW", True, (255, 0, 255))
             screen.blit(txt, [WIDTH//2-80, HEIGHT//2])
             pg.display.update()
             time.sleep(1)
