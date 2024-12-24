@@ -258,6 +258,53 @@ class Bomb:
             screen.blit(self.img_mozi_2, self.rct_mozi_2)
 
 
+# class Score:
+#     def __init__(self, position: tuple[int, int]):
+#         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.score = 0
+#         self.position = position
+
+#     def update(self, screen):
+#         img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
+#         rct = img.get_rect()
+#         rct.center = self.position
+#         screen.blit(img, rct)
+
+
+# class SP:
+#     """SPに関するクラス"""
+#     def __init__(self, position: tuple[int, int]):
+#         """
+#         fontoで表示するためのフォントを設定
+#         spはスキルポイント。初期値は0
+#         positionはspの表示位置"""
+#         # self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.sp = 5
+#         # self.position = position
+
+    # def update(self, screen):
+    #     # img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
+    #     # rct = img.get_rect()
+    #     # rct.center = self.position
+    #     # screen.blit(img, rct)-@ 
+
+
+class Explosion:
+    def __init__(self, bomb: Bomb):
+        self.img1 = pg.image.load(f"fig/explosion.gif")
+        self.img2 = pg.transform.flip(self.img1, True, True)
+        self.imgs = [self.img1, self.img2]
+        self.rct = self.img1.get_rect()
+        self.rct.center = bomb.rct.center
+        self.life = 50
+
+    def update(self, screen):
+        self.life -= 1
+        if self.life > 0:
+            ind = (self.life // 10) % 2
+            screen.blit(self.imgs[ind], self.rct)
+
+
 class Limit:
     def __init__(self):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
@@ -358,7 +405,35 @@ class GoalState:
         for key in self.cooldowns:
             if self.cooldowns[key] > 0:
                 self.cooldowns[key] -= 1
-                
+#スキル状態の表示は推奨機ではスペックが足りない可能性
+# def draw_skill_status(screen, goal_state: GoalState, font):
+#     """
+#     スキルの状態を描画する
+#     screen: 描画する画面Surface
+#     goal_state: GoalStateオブジェクト
+#     font: フォントオブジェクト
+#     """
+#     # プレイヤー1のスキル表示位置
+#     p1_base_x, p1_base_y = WIDTH - 300, 100
+#     # プレイヤー2のスキル表示位置
+#     p2_base_x, p2_base_y = 10, 100
+#     for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
+#         for skill in ["color", "size"]:
+#             key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
+#             skill_name = goal_state.skill_names[key]
+#             cooldown = goal_state.cooldowns[key]
+#             # 状態テキストの生成
+#             if cooldown == 0:
+#                 status_text = f"{skill_name}: スキル使用可能"
+#                 color = (0, 255, 0)  # 使用可能の色: 緑
+#             else:
+#                 status_text = f"{skill_name}: クールダウン中()"  #{cooldown // 50:.1f}s)"
+#                 color = (255, 0, 0)  # クールダウン中の色: 赤
+#             # 描画
+#             font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
+#             skill_text = font.render(status_text, True, color)
+#             screen.blit(skill_text, (base_x, base_y))
+#             base_y += 30  # 次のスキル用に行を下げる
 
 def check_coll(bomb: Bomb, bird: Bird) -> None:
     """
@@ -576,6 +651,12 @@ def check_bird_coll_with_wall(bird: Bird, wall: Wall) -> None:
         # 壁の右側から衝突した場合
         elif bird.rct.left < wall.rct.right and bird.dire[0] < 0:
             bird.rct.left = wall.rct.right
+        # 壁の上側から衝突した場合
+        # if bird.rct.bottom > wall.rct.top and bird.dire[1] > 0:
+        #     bird.rct.bottom = wall.rct.top
+        # # 壁の下側から衝突した場合
+        # elif bird.rct.top < wall.rct.bottom and bird.dire[1] < 0:
+        #     bird.rct.top = wall.rct.bottom
 
 def main():
     NUM_OF_BOMBS = 1
@@ -596,15 +677,22 @@ def main():
     next2 = Next2() ##
     #score = Score()
     goal_state = GoalState()  # ゲーム状態の管理
+    expls = []
     limit = Limit()
     freeze_bird = Freeze(120)  # 5秒間凍結
     freeze_bird2 = Freeze(120)  # 5秒間凍結
     tmr = 0
-    # フォント設定（日本語対応フォントを指定）
+    # # フォント設定（日本語対応フォントを指定）
+    # font_path = "C:/Windows/Fonts/msgothic.ttc"  # 日本語対応フォント
+    # font = pg.font.Font(font_path, 30)  # フォントサイズ30
     font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
 
     right_sp = 1
     left_sp = 1
+
+    # ゴールの設定
+    # left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
 
     while True:
         for event in pg.event.get():
@@ -637,6 +725,26 @@ def main():
         screen.blit(bg_img, [0, 0])
         goal1.update(screen)
         goal2.update(screen) 
+        #ゴール実装初期
+        # # ゴールに到達したか判定
+        # if bomb.rct.colliderect(goal.rct):
+        #     score.score += 1  # 1点アップ
+        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+        #     # fonto = pg.font.Font(None, 80)
+        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+        #     # pg.display.update()
+        #     time.sleep(2)
+        #     # return
+        # if bomb.rct.colliderect(goal2.rct):
+        #     score.score += 1  # 1点アップ
+        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
+        #     # fonto = pg.font.Font(None, 80)
+        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
+        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
+        #     # pg.display.update()
+        #     time.sleep(2)
+        #     # return
         if limit.time == 0:  # 結果発表
             fonto = pg.font.Font(None, 80)
             if goal_state.scores["player1"] < goal_state.scores["player2"]:
@@ -794,6 +902,10 @@ def main():
         p2_score_text = font.render(f"P2 Score: {goal_state.scores['player1']}", True, (255, 0, 0))
         screen.blit(p1_score_text, (WIDTH - 200, HEIGHT - 50))
         screen.blit(p2_score_text, (10, HEIGHT - 50))
+        #score.update(screen)
+        expls = [expl for expl in expls if expl.life > 0]
+        for expl in expls:
+            expl.update(screen)
         # タイマーの更新
         goal_state.update()
         if (tmr != 0) and (tmr % 50 == 0):
