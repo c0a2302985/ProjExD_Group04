@@ -5,9 +5,9 @@ import sys
 import time
 import pygame as pg
 
-
 WIDTH = 800  # ゲームウィンドウの幅
 HEIGHT = 600  # ゲームウィンドウの高さ
+SP_COST = 1
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -30,10 +30,10 @@ class Bird:
     ゲームキャラクター（こうかとん）に関するクラス
     """
     delta = {  # 押下キーと移動量の辞書
-        pg.K_UP: (0, -5),
-        pg.K_DOWN: (0, +5),
-        pg.K_LEFT: (-5, 0),
-        pg.K_RIGHT: (+5, 0),
+        pg.K_i: (0, -5),
+        pg.K_k: (0, +5),
+        pg.K_j: (-5, 0),
+        pg.K_l: (+5, 0),
     }
     img0 = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん（右向き）
@@ -57,6 +57,7 @@ class Bird:
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
         self.dire = (+5, 0)
+        self.frozen = False  # 凍結状態を示すフラグ
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -73,6 +74,10 @@ class Bird:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        if self.frozen:
+            screen.blit(self.img, self.rct)  # 凍結中はその場に留まる
+            return  # 凍結中は操作を受け付けない
+
         sum_mv = [0, 0]
         for k, mv in __class__.delta.items():
             if key_lst[k]:
@@ -86,6 +91,7 @@ class Bird:
         screen.blit(self.img, self.rct)
         if sum_mv != [0, 0]:
             self.dire = (sum_mv[0], sum_mv[1])
+
 
 class Bird2:
     """
@@ -119,6 +125,7 @@ class Bird2:
         self.rct: pg.Rect = self.img.get_rect()
         self.rct.center = xy
         self.dire = (+5, 0)
+        self.frozen = False  # 凍結状態を示すフラグ
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -135,6 +142,10 @@ class Bird2:
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
         """
+        if self.frozen:
+            screen.blit(self.img, self.rct)  # 凍結中はその場に留まる
+            return  # 凍結中は操作を受け付けない
+
         sum_mv = [0, 0]
         for k, mv in __class__.delta.items():
             if key_lst[k]:
@@ -147,18 +158,21 @@ class Bird2:
             self.img = __class__.imgs[tuple(sum_mv)]
         screen.blit(self.img, self.rct)
         if sum_mv != [0, 0]:
-            self.dire = (sum_mv[0], sum_mv[1])   
+            self.dire = (sum_mv[0], sum_mv[1])
+
+
 
 
 class Bomb:
     """
     爆弾に関するクラス
     """
-    def __init__(self, color: tuple[int, int, int], rad: int):
+    def __init__(self, color: tuple[int, int, int], rad: int, score_value=1):
         """
         引数に基づき爆弾円Surfaceを生成する
         引数1 color：爆弾円の色タプル
         引数2 rad：爆弾円の半径
+        引数3 score_value：爆弾のスコア値
         """
         self.img = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.img, color, (rad, rad), rad)
@@ -167,6 +181,7 @@ class Bomb:
         self.rct.center = (WIDTH/2,HEIGHT/2)
         # self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
         self.vx, self.vy = +5, +5
+        self.score_value = score_value
 
     def update(self, screen: pg.Surface):
         """
@@ -182,17 +197,35 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
-class Score:
-    def __init__(self):
-        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.score = 0
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        self.rct = self.img.get_rect()
-        self.rct.center = (100, HEIGHT-50)
+# class Score:
+#     def __init__(self, position: tuple[int, int]):
+#         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.score = 0
+#         self.position = position
 
-    def update(self, screen):
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        screen.blit(self.img, self.rct)
+#     def update(self, screen):
+#         img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
+#         rct = img.get_rect()
+#         rct.center = self.position
+#         screen.blit(img, rct)
+
+
+# class SP:
+#     """SPに関するクラス"""
+#     def __init__(self, position: tuple[int, int]):
+#         """
+#         fontoで表示するためのフォントを設定
+#         spはスキルポイント。初期値は0
+#         positionはspの表示位置"""
+#         # self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.sp = 5
+#         # self.position = position
+
+    # def update(self, screen):
+    #     # img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
+    #     # rct = img.get_rect()
+    #     # rct.center = self.position
+    #     # screen.blit(img, rct)
 
 
 class Explosion:
@@ -363,6 +396,36 @@ def check_coll(bomb: Bomb, bird: Bird) -> None:
         bomb.vx *= -1
 
 
+class Freeze:
+    """停止スキルに関するクラス"""
+    def __init__(self, duration: int):
+        """
+        durationは凍結の持続時間を指定する
+        timerは停止時間のカウント。初期値は0
+        """
+        self.duration = duration
+        self.timer = 0
+
+    def update(self):
+        """
+        timerの数字を1づつ減らしていく
+        """
+        if self.timer > 0:
+            self.timer -= 1
+
+    def activate(self):
+        """
+        停止状態を開始する
+        """
+        self.timer = self.duration
+
+    def is_active(self):
+        """
+        停止状態かのチェック
+        """
+        return self.timer > 0
+
+
 def main():
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
@@ -379,11 +442,20 @@ def main():
     goal_state = GoalState()  # ゲーム状態の管理
     expls = []
     limit = Limit()
+    freeze_bird = Freeze(120)  # 5秒間凍結
+    freeze_bird2 = Freeze(120)  # 5秒間凍結
     tmr = 0
     # # フォント設定（日本語対応フォントを指定）
     # font_path = "C:/Windows/Fonts/msgothic.ttc"  # 日本語対応フォント
     # font = pg.font.Font(font_path, 30)  # フォントサイズ30
     font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
+
+    right_sp = 1
+    left_sp = 1
+
+    # ゴールの設定
+    # left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
 
     while True:
         for event in pg.event.get():
@@ -455,6 +527,19 @@ def main():
             goal_state.scores["player2"] += 1
             bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
             time.sleep(1)  # 一時停止（動作確認用）
+        if key_lst[pg.K_LSHIFT] and left_sp >= SP_COST:
+            freeze_bird.activate()
+            left_sp -= SP_COST #コストを消費
+        if key_lst[pg.K_RSHIFT] and right_sp >= SP_COST:
+            freeze_bird2.activate()
+            right_sp -= SP_COST#コストを消費
+
+        freeze_bird.update()
+        freeze_bird2.update()
+
+        bird.frozen = freeze_bird.is_active()
+        bird2.frozen = freeze_bird2.is_active()
+
         bird.update(key_lst, screen)
         bird2.update(key_lst, screen)
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
@@ -474,6 +559,9 @@ def main():
         goal_state.update()
         if (tmr != 0) and (tmr % 50 == 0):
             limit.time -= 1
+        # if (tmr != 0) and (tmr % 150 == 0):  # 3秒ごとにSPを増やす
+        #     sp_left.sp += 1
+        #     sp_right.sp += 1
         limit.update(screen)
         pg.display.update()
         tmr += 1
