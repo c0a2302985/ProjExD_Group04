@@ -308,7 +308,7 @@ class Explosion:
 class Limit:
     def __init__(self):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.time = 60
+        self.time = 5
         self.img = self.fonto.render(f"制限時間：{self.time}", 0, (255, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = (100, 50)
@@ -694,11 +694,11 @@ def main():
         if limit.time == 0:  # 結果発表
             fonto = pg.font.Font(None, 80)
             if goal_state.scores["player1"] < goal_state.scores["player2"]:
-                txt = fonto.render("1P win", True, (255, 0, 0))
+                txt = fonto.render("1P WIN", True, (0, 0, 255))
             if goal_state.scores["player1"] > goal_state.scores["player2"]:
-                txt = fonto.render("2P win", True, (255, 0, 0))
+                txt = fonto.render("2P WIN", True, (255, 0, 0))
             if goal_state.scores["player1"] == goal_state.scores["player2"]:
-                txt = fonto.render("draw", True, (255, 0, 0))
+                txt = fonto.render("DRAW", True, (255, 0, 255))
             screen.blit(txt, [WIDTH//2-80, HEIGHT//2])
             pg.display.update()
             time.sleep(1)
