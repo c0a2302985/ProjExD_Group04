@@ -285,35 +285,6 @@ class GoalState:
         for key in self.cooldowns:
             if self.cooldowns[key] > 0:
                 self.cooldowns[key] -= 1
-#スキル状態の表示は推奨機ではスペックが足りない可能性
-# def draw_skill_status(screen, goal_state: GoalState, font):
-#     """
-#     スキルの状態を描画する
-#     screen: 描画する画面Surface
-#     goal_state: GoalStateオブジェクト
-#     font: フォントオブジェクト
-#     """
-#     # プレイヤー1のスキル表示位置
-#     p1_base_x, p1_base_y = WIDTH - 300, 100
-#     # プレイヤー2のスキル表示位置
-#     p2_base_x, p2_base_y = 10, 100
-#     for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
-#         for skill in ["color", "size"]:
-#             key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
-#             skill_name = goal_state.skill_names[key]
-#             cooldown = goal_state.cooldowns[key]
-#             # 状態テキストの生成
-#             if cooldown == 0:
-#                 status_text = f"{skill_name}: スキル使用可能"
-#                 color = (0, 255, 0)  # 使用可能の色: 緑
-#             else:
-#                 status_text = f"{skill_name}: クールダウン中()"  #{cooldown // 50:.1f}s)"
-#                 color = (255, 0, 0)  # クールダウン中の色: 赤
-#             # 描画
-#             font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
-#             skill_text = font.render(status_text, True, color)
-#             screen.blit(skill_text, (base_x, base_y))
-#             base_y += 30  # 次のスキル用に行を下げる
 
 def check_coll(bomb: Bomb, bird: Bird) -> None:
     """
@@ -337,38 +308,6 @@ def check_coll(bomb: Bomb, bird: Bird) -> None:
         bomb.vx *= -1
 
 
-class Freeze:
-    """停止スキルに関するクラス"""
-    def __init__(self, duration: int):
-        """
-        durationは凍結の持続時間を指定する
-        timerは停止時間のカウント。初期値は0
-        """
-        self.duration = duration
-        self.timer = 0
-
-    def update(self):
-        """
-        timerの数字を1づつ減らしていく
-        """
-        if self.timer > 0:
-            self.timer -= 1
-
-    def activate(self):
-        """
-        停止状態を開始する
-        """
-        self.timer = self.duration
-
-    def is_active(self):
-        """
-        停止状態かのチェック
-        """
-        return self.timer > 0
-    
-
-
-
 
 def main():
     NUM_OF_BOMBS = 1
@@ -385,21 +324,8 @@ def main():
     #score = Score()
     goal_state = GoalState()  # ゲーム状態の管理
     expls = []
-    limit = Limit()
-    freeze_bird = Freeze(120)  # 5秒間凍結
-    freeze_bird2 = Freeze(120)  # 5秒間凍結
     tmr = 0
-    # # フォント設定（日本語対応フォントを指定）
-    # font_path = "C:/Windows/Fonts/msgothic.ttc"  # 日本語対応フォント
-    # font = pg.font.Font(font_path, 30)  # フォントサイズ30
     font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
-
-    right_sp = 1
-    left_sp = 1
-
-    # ゴールの設定
-    # left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
-    # right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
 
     while True:
         for event in pg.event.get():
@@ -408,33 +334,6 @@ def main():
         screen.blit(bg_img, [0, 0])
         goal1.update(screen)
         goal2.update(screen) 
-        #ゴール実装初期
-        # # ゴールに到達したか判定
-        # if bomb.rct.colliderect(goal.rct):
-        #     score.score += 1  # 1点アップ
-        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
-        #     # fonto = pg.font.Font(None, 80)
-        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-        #     # pg.display.update()
-        #     time.sleep(2)
-        #     # return
-        # if bomb.rct.colliderect(goal2.rct):
-        #     score.score += 1  # 1点アップ
-        #     bomb.rct.center = (WIDTH/2,HEIGHT/2)  # 爆弾を中心位置に再配置
-        #     # fonto = pg.font.Font(None, 80)
-        #     # txt = fonto.render("ゴール達成！", True, (0, 255, 0))
-        #     # screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
-        #     # pg.display.update()
-        #     time.sleep(2)
-        #     # return
-        if limit.time == 0:
-            fonto = pg.font.Font(None, 80)
-            txt = fonto.render("end", True, (255, 0, 0))
-            screen.blit(txt, [WIDTH//2-80, HEIGHT//2])
-            pg.display.update()
-            time.sleep(1)
-            return
         
         # 爆弾とこうかとん1の衝突判定
         for bomb in bombs:
@@ -464,25 +363,30 @@ def main():
         # draw_skill_status(screen, goal_state, font)
         # ボールがゴールに到達した場合の処理
         if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
-            goal_state.scores["player1"] += 1
-            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            bombs.remove(bomb)
+            if random.random() > 0.5:
+                bombs.append(Bomb((255, 0, 0), 10,))
+                goal_state.scores["player2"] += 2
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            else:
+                bombs.append(Bomb((255, 215, 0), 10,))
+                goal_state.scores["player2"] += 1
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+
             time.sleep(1)  # 一時停止（動作確認用）
         if bomb.rct.colliderect(goal2.rct) and goal2.timer["color"] == 0:
-            goal_state.scores["player2"] += 1
-            bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            bombs.remove(bomb)
+            if random.random() > 0.5:
+                bombs.append(Bomb((255, 0, 0), 10,))
+                goal_state.scores["player1"] += 1
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
+            else:
+                bombs.append(Bomb((255, 215, 0), 10,))
+                goal_state.scores["player1"] += 2
+                bomb.rct.center = (WIDTH / 2, HEIGHT / 2)  # ボールを中央に戻す
             time.sleep(1)  # 一時停止（動作確認用）
-        if key_lst[pg.K_LSHIFT] and left_sp >= SP_COST:
-            freeze_bird.activate()
-            left_sp -= SP_COST #コストを消費
-        if key_lst[pg.K_RSHIFT] and right_sp >= SP_COST:
-            freeze_bird2.activate()
-            right_sp -= SP_COST#コストを消費
+        
 
-        freeze_bird.update()
-        freeze_bird2.update()
-
-        bird.frozen = freeze_bird.is_active()
-        bird2.frozen = freeze_bird2.is_active()
 
         bird.update(key_lst, screen)
         bird2.update(key_lst, screen)
@@ -501,12 +405,6 @@ def main():
             expl.update(screen)
         # タイマーの更新
         goal_state.update()
-        if (tmr != 0) and (tmr % 50 == 0):
-            limit.time -= 1
-        # if (tmr != 0) and (tmr % 150 == 0):  # 3秒ごとにSPを増やす
-        #     sp_left.sp += 1
-        #     sp_right.sp += 1
-        limit.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
