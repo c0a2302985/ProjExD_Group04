@@ -197,65 +197,6 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
-# class Score:
-#     def __init__(self, position: tuple[int, int]):
-#         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-#         self.score = 0
-#         self.position = position
-
-#     def update(self, screen):
-#         img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-#         rct = img.get_rect()
-#         rct.center = self.position
-#         screen.blit(img, rct)
-
-
-# class SP:
-#     """SPに関するクラス"""
-#     def __init__(self, position: tuple[int, int]):
-#         """
-#         fontoで表示するためのフォントを設定
-#         spはスキルポイント。初期値は0
-#         positionはspの表示位置"""
-#         # self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-#         self.sp = 5
-#         # self.position = position
-
-    # def update(self, screen):
-    #     # img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
-    #     # rct = img.get_rect()
-    #     # rct.center = self.position
-    #     # screen.blit(img, rct)
-
-
-class Explosion:
-    def __init__(self, bomb: Bomb):
-        self.img1 = pg.image.load(f"fig/explosion.gif")
-        self.img2 = pg.transform.flip(self.img1, True, True)
-        self.imgs = [self.img1, self.img2]
-        self.rct = self.img1.get_rect()
-        self.rct.center = bomb.rct.center
-        self.life = 50
-
-    def update(self, screen):
-        self.life -= 1
-        if self.life > 0:
-            ind = (self.life // 10) % 2
-            screen.blit(self.imgs[ind], self.rct)
-
-
-class Limit:
-    def __init__(self):
-        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.time = 1000
-        self.img = self.fonto.render(f"制限時間：{self.time}", 0, (255, 0, 0))
-        self.rct = self.img.get_rect()
-        self.rct.center = (100, 50)
-
-    def update(self, screen):
-        self.img = self.fonto.render(f"制限時間：{self.time}", 0, (0, 0, 255))
-        screen.blit(self.img, self.rct)
-
 class Goal:
     """
     ゴールを描画するクラス
@@ -424,6 +365,9 @@ class Freeze:
         停止状態かのチェック
         """
         return self.timer > 0
+    
+
+
 
 
 def main():
