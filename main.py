@@ -308,7 +308,7 @@ class Explosion:
 class Limit:
     def __init__(self):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.time = 5
+        self.time = 60
         self.img = self.fonto.render(f"制限時間：{self.time}", 0, (255, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = (100, 50)
