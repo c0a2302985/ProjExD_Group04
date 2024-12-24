@@ -311,35 +311,35 @@ class GoalState:
         for key in self.cooldowns:
             if self.cooldowns[key] > 0:
                 self.cooldowns[key] -= 1
-
-def draw_skill_status(screen, goal_state: GoalState, font):
-    """
-    スキルの状態を描画する
-    screen: 描画する画面Surface
-    goal_state: GoalStateオブジェクト
-    font: フォントオブジェクト
-    """
-    # プレイヤー1のスキル表示位置
-    p1_base_x, p1_base_y = WIDTH - 300, 100
-    # プレイヤー2のスキル表示位置
-    p2_base_x, p2_base_y = 10, 100
-    for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
-        for skill in ["color", "size"]:
-            key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
-            skill_name = goal_state.skill_names[key]
-            cooldown = goal_state.cooldowns[key]
-            # 状態テキストの生成
-            if cooldown == 0:
-                status_text = f"{skill_name}: スキル使用可能"
-                color = (0, 255, 0)  # 使用可能の色: 緑
-            else:
-                status_text = f"{skill_name}: クールダウン中({cooldown // 50:.1f}s)"
-                color = (255, 0, 0)  # クールダウン中の色: 赤
-            # 描画
-            font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
-            skill_text = font.render(status_text, True, color)
-            screen.blit(skill_text, (base_x, base_y))
-            base_y += 30  # 次のスキル用に行を下げる
+#スキル状態の表示は推奨機ではスペックが足りない可能性
+# def draw_skill_status(screen, goal_state: GoalState, font):
+#     """
+#     スキルの状態を描画する
+#     screen: 描画する画面Surface
+#     goal_state: GoalStateオブジェクト
+#     font: フォントオブジェクト
+#     """
+#     # プレイヤー1のスキル表示位置
+#     p1_base_x, p1_base_y = WIDTH - 300, 100
+#     # プレイヤー2のスキル表示位置
+#     p2_base_x, p2_base_y = 10, 100
+#     for player, (base_x, base_y, suffix) in zip(["player1", "player2"], [(p1_base_x, p1_base_y, "p1"), (p2_base_x, p2_base_y, "p2")]):
+#         for skill in ["color", "size"]:
+#             key = f"{skill}_{suffix}"  # スキルキー（例: color_p1, size_p2）
+#             skill_name = goal_state.skill_names[key]
+#             cooldown = goal_state.cooldowns[key]
+#             # 状態テキストの生成
+#             if cooldown == 0:
+#                 status_text = f"{skill_name}: スキル使用可能"
+#                 color = (0, 255, 0)  # 使用可能の色: 緑
+#             else:
+#                 status_text = f"{skill_name}: クールダウン中()"  #{cooldown // 50:.1f}s)"
+#                 color = (255, 0, 0)  # クールダウン中の色: 赤
+#             # 描画
+#             font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 15)
+#             skill_text = font.render(status_text, True, color)
+#             screen.blit(skill_text, (base_x, base_y))
+#             base_y += 30  # 次のスキル用に行を下げる
 
 def main():
     NUM_OF_BOMBS = 1
@@ -399,10 +399,10 @@ def main():
             return
         key_lst = pg.key.get_pressed()
         # プレイヤー1のスキル（0: 色変更、9: 高さ縮小）
-        if key_lst[pg.K_0] and goal_state.cooldowns["color_p1"] == 0:
+        if key_lst[pg.K_7] and goal_state.cooldowns["color_p1"] == 0:
             goal1.skill_effect(10 * 50, (255, 255, 0))
             goal_state.cooldowns["color_p1"] = 20 * 50
-        if key_lst[pg.K_9] and goal_state.cooldowns["size_p1"] == 0:
+        if key_lst[pg.K_8] and goal_state.cooldowns["size_p1"] == 0:
             goal1.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p1"] = 15 * 50
         # プレイヤー2のスキル（1: 色変更、2: 高さ縮小）
@@ -412,8 +412,8 @@ def main():
         if key_lst[pg.K_2] and goal_state.cooldowns["size_p2"] == 0:
             goal2.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p2"] = 15 * 50
-        # スキル状態を描画
-        draw_skill_status(screen, goal_state, font)
+        # # スキル状態を描画
+        # draw_skill_status(screen, goal_state, font)
         # ボールがゴールに到達した場合の処理
         if bomb.rct.colliderect(goal1.rct) and goal1.timer["color"] == 0:
             goal_state.scores["player1"] += 1
