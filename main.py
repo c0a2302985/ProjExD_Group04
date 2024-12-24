@@ -223,9 +223,9 @@ class Limit:
         screen.blit(self.img, self.rct)
 
 
-class Fake:
+class Fake: ##
     """
-    フェイクの爆弾に関するクラス
+    フェイク爆弾に関するクラス
     """
     def __init__(self, color: tuple[int, int, int], rad: int):
         """
@@ -254,8 +254,35 @@ class Fake:
         screen.blit(self.img, self.rct)
 
 
+class Next: ##
+    """
+    フェイク爆弾の技を発動できるか出来ないかを判定する
+    """
+    def __init__(self):
+        """
+        丸かバツを表示するクラス
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
+        self.color = (0, 0, 255) #文字色の設定
+        self.num = 301 #フェイク爆弾を出すか出さないかを判断する数
+        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
+        self.img2 = self.fonto.render(f"✕", 0, self.color)
+        self.ix, self.iy = 50, HEIGHT-100
+
+    def update(self, screen: pg.Surface):
+        """
+        フェイク爆弾を発動できるか出来ないかの判定を行い表示する
+        引数 screen：画面Surface
+        """
+        if self.num >= 300 :
+            self.img1 = self.fonto.render(f"〇", 0, self.color)
+            screen.blit(self.img1, (self.ix, self.iy))
+        else:
+            self.img2 = self.fonto.render(f"バツ", 0, self.color)
+            screen.blit(self.img2, (self.ix, self.iy))
+
+
 def main():
-    count_double = 201 #fakeボールを2個にした時の時間を図る関数
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -266,6 +293,7 @@ def main():
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
     fake = None
+    next = Next()
     score = Score()
     expls = []
     limit = Limit()
@@ -274,17 +302,13 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
-            if event.type == pg.KEYDOWN and event.key == pg.K_b and count_double >= 200: #jを押すとfakeボールが出る
-                fake = Fake((255, 255, 0), 20)
-                count_double = 0
+            
+            if event.type == pg.KEYDOWN and event.key == pg.K_b and next.num >= 300: ##bを押すとfakeボールが出る
+                fake = Fake((255, 255, 0), 20) ##
+                next.num = 0 ##
+
 
         screen.blit(bg_img, [0, 0])
-
-        if fake is not None: #fakeクラスが発動されていて
-            if bird.rct.colliderect(fake.rct): #fakeボールと衝突したら消える
-                bird.change_img(8, screen)
-                count_double = 200
-                return
         
         if limit.time == 0:
             fonto = pg.font.Font(None, 80)
@@ -293,6 +317,12 @@ def main():
             pg.display.update()
             time.sleep(1)
             return
+        
+        if fake is not None: ##fakeクラスが発動されていて
+            if bird.rct.colliderect(fake.rct): ##f#akeボールと衝突したら消える
+                bird.change_img(8, screen) 
+                next.num = 0 ##
+                return
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -308,16 +338,19 @@ def main():
             limit.time -= 1
         limit.update(screen)
 
-        if count_double == 200: #fakeボールがでて200フレームたったらfakeボールが消える
-            fake = None #fakeをNoneに戻す
-            count_double = 0
+        if fake is not None: ##
+            if next.num == 200: #fakeボールがでて200フレームたったらfakeボールが消える
+                next.num = 0 ##
+                fake = None #fakeをNoneに戻す
 
-        if fake is not None: #fakeがNoneでない時に
-            fake.update(screen)
+            # if fake is not None: #fakeがNoneでない時に
+            if fake is not None: ##
+                fake.update(screen) ##
 
+        next.update(screen) ##
         pg.display.update()
         tmr += 1
-        count_double += 1
+        next.num += 1 ##
         clock.tick(50)
 
 
