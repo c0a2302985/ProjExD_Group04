@@ -830,7 +830,7 @@ def main():
             if fake1 is not None: ##
                 fake1.update(screen) ##
         
-        if fake2 is not None: ##
+        if fake2 is not None: ##d
             if next2.num == 500: #fakeボール2がでて200フレームたったらfakeボールが消える
                 next2.num = 0 ##
                 fake2 = None #fake2をNoneに戻す
