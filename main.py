@@ -223,9 +223,9 @@ class Limit:
         screen.blit(self.img, self.rct)
 
 
-class Fake: ##
+class Fake1: ##
     """
-    フェイク爆弾に関するクラス
+    フェイク爆弾1に関するクラス
     """
     def __init__(self, color: tuple[int, int, int], rad: int):
         """
@@ -237,7 +237,7 @@ class Fake: ##
         pg.draw.circle(self.img, color, (rad, rad), rad)
         self.img.set_colorkey((0, 0, 0))
         self.rct = self.img.get_rect()
-        self.rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)
+        self.rct.center = random.randint(20, WIDTH-20), random.randint(20, HEIGHT-20)
         self.vx, self.vy = +5, +5
 
     def update(self, screen: pg.Surface):
@@ -254,9 +254,40 @@ class Fake: ##
         screen.blit(self.img, self.rct)
 
 
-class Next: ##
+class Fake2: ##
     """
-    フェイク爆弾の技を発動できるか出来ないかを判定する
+    フェイク爆弾2に関するクラス
+    """
+    def __init__(self, color: tuple[int, int, int], rad: int):
+        """
+        引数に基づき爆弾円Surfaceを生成する
+        引数1 color：爆弾円の色タプル
+        引数2 rad：爆弾円の半径
+        """
+        self.img = pg.Surface((2*rad, 2*rad))
+        pg.draw.circle(self.img, color, (rad, rad), rad)
+        self.img.set_colorkey((0, 0, 0))
+        self.rct = self.img.get_rect()
+        self.rct.center = random.randint(20, WIDTH-20), random.randint(20, HEIGHT-20)
+        self.vx, self.vy = +5, +5
+
+    def update(self, screen: pg.Surface):
+        """
+        爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        yoko, tate = check_bound(self.rct)
+        if not yoko:
+            self.vx *= -1
+        if not tate:
+            self.vy *= -1
+        self.rct.move_ip(self.vx, self.vy)
+        screen.blit(self.img, self.rct)
+
+
+class Next1: ##
+    """
+    フェイク爆弾1の技を発動できるか出来ないかを判定する
     """
     def __init__(self):
         """
@@ -271,7 +302,35 @@ class Next: ##
 
     def update(self, screen: pg.Surface):
         """
-        フェイク爆弾を発動できるか出来ないかの判定を行い表示する
+        フェイク爆弾1を発動できるか出来ないかの判定を行い表示する
+        引数 screen：画面Surface
+        """
+        if self.num >= 300 :
+            self.img1 = self.fonto.render(f"〇", 0, self.color)
+            screen.blit(self.img1, (self.ix, self.iy))
+        else:
+            self.img2 = self.fonto.render(f"バツ", 0, self.color)
+            screen.blit(self.img2, (self.ix, self.iy))
+
+
+class Next2: ##
+    """
+    フェイク爆弾2の技を発動できるか出来ないかを判定する
+    """
+    def __init__(self):
+        """
+        丸かバツを表示するクラス
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
+        self.color = (0, 0, 255) #文字色の設定
+        self.num = 301 #フェイク爆弾を出すか出さないかを判断する数
+        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
+        self.img2 = self.fonto.render(f"✕", 0, self.color)
+        self.ix, self.iy = 650, HEIGHT-100
+
+    def update(self, screen: pg.Surface):
+        """
+        フェイク爆弾2を発動できるか出来ないかの判定を行い表示する
         引数 screen：画面Surface
         """
         if self.num >= 300 :
@@ -292,8 +351,10 @@ def main():
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
-    fake = None
-    next = Next()
+    fake1 = None
+    fake2 = None
+    next1 = Next1() ##
+    next2 = Next2() ##
     score = Score()
     expls = []
     limit = Limit()
@@ -303,10 +364,13 @@ def main():
             if event.type == pg.QUIT:
                 return
             
-            if event.type == pg.KEYDOWN and event.key == pg.K_b and next.num >= 300: ##bを押すとfakeボールが出る
-                fake = Fake((255, 255, 0), 20) ##
-                next.num = 0 ##
-
+            if event.type == pg.KEYDOWN and event.key == pg.K_4 and next1.num >= 300: ##bを押すとfakeボール1が出る
+                fake1 = Fake1((255, 255, 0), 20) ##
+                next1.num = 0 ##
+            
+            if event.type == pg.KEYDOWN and event.key == pg.K_0 and next2.num >= 300: ##bを押すとfakeボール2が出る
+                fake2 = Fake2((255, 255, 255), 20) ##
+                next2.num = 0 ##
 
         screen.blit(bg_img, [0, 0])
         
@@ -318,11 +382,6 @@ def main():
             time.sleep(1)
             return
         
-        if fake is not None: ##fakeクラスが発動されていて
-            if bird.rct.colliderect(fake.rct): ##f#akeボールと衝突したら消える
-                bird.change_img(8, screen) 
-                next.num = 0 ##
-                return
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -338,19 +397,28 @@ def main():
             limit.time -= 1
         limit.update(screen)
 
-        if fake is not None: ##
-            if next.num == 200: #fakeボールがでて200フレームたったらfakeボールが消える
-                next.num = 0 ##
-                fake = None #fakeをNoneに戻す
+        if fake1 is not None: ##
+            if next1.num == 200: #fakeボール1がでて200フレームたったらfakeボール1が消える
+                next1.num = 0 ##
+                fake1 = None #fake1をNoneに戻す
 
-            # if fake is not None: #fakeがNoneでない時に
-            if fake is not None: ##
-                fake.update(screen) ##
+            if fake1 is not None: ##
+                fake1.update(screen) ##
+        
+        if fake2 is not None: ##
+            if next2.num == 200: #fakeボール2がでて200フレームたったらfakeボールが消える
+                next2.num = 0 ##
+                fake2 = None #fake2をNoneに戻す
 
-        next.update(screen) ##
+            if fake2 is not None: ##
+                fake2.update(screen) ##
+
+        next1.update(screen) ##
+        next2.update(screen) ##
         pg.display.update()
         tmr += 1
-        next.num += 1 ##
+        next1.num += 1 ##
+        next2.num += 1 ##
         clock.tick(50)
 
 
