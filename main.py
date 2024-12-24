@@ -7,9 +7,9 @@ import pygame as pg
 
 WIDTH = 500  # ゲームウィンドウの幅
 HEIGHT = 500  # ゲームウィンドウの高さ
-#GOAL_WIDTH = 50  # ゴールの幅
-#GOAL_HEIGHT = 100  # ゴールの高さ
-SP_COST = 5  # 氷結スキルの消費SP
+# GOAL_WIDTH = 50  # ゴールの幅
+# GOAL_HEIGHT = 100  # ゴールの高さ
+SP_COST = 1  # 氷結スキルの消費SP
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -32,10 +32,10 @@ class Bird:
     ゲームキャラクター（こうかとん）に関するクラス
     """
     delta = {  # 押下キーと移動量の辞書
-        pg.K_UP: (0, -5),
-        pg.K_DOWN: (0, +5),
-        pg.K_LEFT: (-5, 0),
-        pg.K_RIGHT: (+5, 0),
+        pg.K_i: (0, -5),
+        pg.K_k: (0, +5),
+        pg.K_j: (-5, 0),
+        pg.K_l: (+5, 0),
     }
     img0 = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
     img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん（右向き）
@@ -198,35 +198,35 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
-class Score:
-    def __init__(self, position: tuple[int, int]):
-        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.score = 0
-        self.position = position
+# class Score:
+#     def __init__(self, position: tuple[int, int]):
+#         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.score = 0
+#         self.position = position
 
-    def update(self, screen):
-        img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
-        rct = img.get_rect()
-        rct.center = self.position
-        screen.blit(img, rct)
+#     def update(self, screen):
+#         img = self.fonto.render(f"スコア：{self.score}", 0, (0, 0, 255))
+#         rct = img.get_rect()
+#         rct.center = self.position
+#         screen.blit(img, rct)
 
 
-class SP:
-    """SPに関するクラス"""
-    def __init__(self, position: tuple[int, int]):
-        """
-        fontoで表示するためのフォントを設定
-        spはスキルポイント。初期値は0
-        positionはspの表示位置"""
-        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.sp = 0
-        self.position = position
+# class SP:
+#     """SPに関するクラス"""
+#     def __init__(self, position: tuple[int, int]):
+#         """
+#         fontoで表示するためのフォントを設定
+#         spはスキルポイント。初期値は0
+#         positionはspの表示位置"""
+#         # self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+#         self.sp = 5
+#         # self.position = position
 
-    def update(self, screen):
-        img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
-        rct = img.get_rect()
-        rct.center = self.position
-        screen.blit(img, rct)
+    # def update(self, screen):
+    #     # img = self.fonto.render(f"SP：{self.sp}", 0, (0, 255, 0))
+    #     # rct = img.get_rect()
+    #     # rct.center = self.position
+    #     # screen.blit(img, rct)
 
 
 class Explosion:
@@ -297,19 +297,21 @@ def main():
     bird2 = Bird2((100, 250))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     clock = pg.time.Clock()
-    score_left = Score((100, HEIGHT-50))
-    score_right = Score((WIDTH-100, HEIGHT-50))
-    sp_left = SP((100, HEIGHT-100))
-    sp_right = SP((WIDTH-100, HEIGHT-100))
+    # score_left = Score((100, HEIGHT-50))
+    # score_right = Score((WIDTH-100, HEIGHT-50))
+    # sp_left = SP((100, HEIGHT-100))
+    # sp_right = SP((WIDTH-100, HEIGHT-100))
     expls = []
     limit = Limit()
-    freeze_bird = Freeze(300)  # 5秒間凍結
-    freeze_bird2 = Freeze(300)  # 5秒間凍結
+    freeze_bird = Freeze(120)  # 5秒間凍結
+    freeze_bird2 = Freeze(120)  # 5秒間凍結
     tmr = 0
+    right_sp = 1
+    left_sp = 1
 
     # ゴールの設定
-    #left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
-    #right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    # right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
 
     while True:
         for event in pg.event.get():
@@ -326,12 +328,12 @@ def main():
             return
 
         key_lst = pg.key.get_pressed()
-        if key_lst[pg.K_1] and sp_left.sp >= SP_COST:
+        if key_lst[pg.K_LSHIFT] and left_sp >= SP_COST:
             freeze_bird.activate()
-            sp_left.sp -= SP_COST #コストを消費
-        if key_lst[pg.K_0] and sp_right.sp >= SP_COST:
+            left_sp -= SP_COST #コストを消費
+        if key_lst[pg.K_RSHIFT] and right_sp >= SP_COST:
             freeze_bird2.activate()
-            sp_right.sp -= SP_COST#コストを消費
+            right_sp -= SP_COST#コストを消費
 
         freeze_bird.update()
         freeze_bird2.update()
@@ -344,32 +346,32 @@ def main():
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-            if goal1.colliderect(bomb.rct):
-                score_right.score += bomb.score_value
-                sp_left.sp += 1  # ゴールされた側のSPを増やす
-                bombs.remove(bomb)
-            elif goal2.colliderect(bomb.rct):
-                score_left.score += bomb.score_value
-                sp_right.sp += 1  # ゴールされた側のSPを増やす
-                bombs.remove(bomb)
+            # if goal1.colliderect(bomb.rct):
+            #     score_right.score += bomb.score_value
+            #     # sp_left.sp += 1  # ゴールされた側のSPを増やす
+            #     bombs.remove(bomb)
+            # elif goal2.colliderect(bomb.rct):
+            #     score_left.score += bomb.score_value
+            #     # sp_right.sp += 1  # ゴールされた側のSPを増やす
+            #     bombs.remove(bomb)
 
 
         # # ゴールの描画
         # pg.draw.rect(screen, (0, 255, 0), left_goal)
         # pg.draw.rect(screen, (0, 0, 255), right_goal)
 
-        score_left.update(screen)
-        score_right.update(screen)
-        sp_left.update(screen)
-        sp_right.update(screen)
+        # score_left.update(screen)
+        # score_right.update(screen)
+        # sp_left.update(screen)
+        # sp_right.update(screen)
         expls = [expl for expl in expls if expl.life > 0]
         for expl in expls:
             expl.update(screen)
         if (tmr != 0) and (tmr % 50 == 0):
             limit.time -= 1
-        if (tmr != 0) and (tmr % 150 == 0):  # 3秒ごとにSPを増やす
-            sp_left.sp += 1
-            sp_right.sp += 1
+        # if (tmr != 0) and (tmr % 150 == 0):  # 3秒ごとにSPを増やす
+        #     sp_left.sp += 1
+        #     sp_right.sp += 1
         limit.update(screen)
         pg.display.update()
         tmr += 1
