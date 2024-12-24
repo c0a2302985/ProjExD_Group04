@@ -7,8 +7,8 @@ import pygame as pg
 
 WIDTH = 500  # ゲームウィンドウの幅
 HEIGHT = 500  # ゲームウィンドウの高さ
-GOAL_WIDTH = 50  # ゴールの幅
-GOAL_HEIGHT = 100  # ゴールの高さ
+#GOAL_WIDTH = 50  # ゴールの幅
+#GOAL_HEIGHT = 100  # ゴールの高さ
 SP_COST = 5  # 氷結スキルの消費SP
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -308,8 +308,8 @@ def main():
     tmr = 0
 
     # ゴールの設定
-    left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
-    right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    #left_goal = pg.Rect(0, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
+    #right_goal = pg.Rect(WIDTH - GOAL_WIDTH, (HEIGHT - GOAL_HEIGHT) // 2, GOAL_WIDTH, GOAL_HEIGHT)
 
     while True:
         for event in pg.event.get():
@@ -344,19 +344,19 @@ def main():
         bombs = [bomb for bomb in bombs if bomb is not None]  # Noneでないもののリスト
         for bomb in bombs:
             bomb.update(screen)
-            if left_goal.colliderect(bomb.rct):
+            if goal1.colliderect(bomb.rct):
                 score_right.score += bomb.score_value
                 sp_left.sp += 1  # ゴールされた側のSPを増やす
                 bombs.remove(bomb)
-            elif right_goal.colliderect(bomb.rct):
+            elif goal2.colliderect(bomb.rct):
                 score_left.score += bomb.score_value
                 sp_right.sp += 1  # ゴールされた側のSPを増やす
                 bombs.remove(bomb)
 
 
-        # ゴールの描画
-        pg.draw.rect(screen, (0, 255, 0), left_goal)
-        pg.draw.rect(screen, (0, 0, 255), right_goal)
+        # # ゴールの描画
+        # pg.draw.rect(screen, (0, 255, 0), left_goal)
+        # pg.draw.rect(screen, (0, 0, 255), right_goal)
 
         score_left.update(screen)
         score_right.update(screen)
