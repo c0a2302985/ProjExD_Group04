@@ -308,7 +308,7 @@ class Explosion:
 class Limit:
     def __init__(self):
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
-        self.time = 1000
+        self.time = 60
         self.img = self.fonto.render(f"制限時間：{self.time}", 0, (255, 0, 0))
         self.rct = self.img.get_rect()
         self.rct.center = (100, 50)
@@ -487,6 +487,124 @@ class Freeze:
         return self.timer > 0
 
 
+class Fake1: ##
+    """
+    フェイク爆弾1に関するクラス
+    """
+    def __init__(self, color: tuple[int, int, int], rad: int):
+        """
+        引数に基づき爆弾円Surfaceを生成する
+        引数1 color：爆弾円の色タプル
+        引数2 rad：爆弾円の半径
+        """
+        self.img = pg.Surface((2*rad, 2*rad))
+        pg.draw.circle(self.img, color, (rad, rad), rad)
+        self.img.set_colorkey((0, 0, 0))
+        self.rct = self.img.get_rect()
+        self.rct.center = random.randint(20, WIDTH-20), random.randint(20, HEIGHT-20)
+        self.vx, self.vy = +5, +5
+
+    def update(self, screen: pg.Surface):
+        """
+        爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        yoko, tate = check_bound(self.rct)
+        if not yoko:
+            self.vx *= -1
+        if not tate:
+            self.vy *= -1
+        self.rct.move_ip(self.vx, self.vy)
+        screen.blit(self.img, self.rct)
+
+
+class Fake2: ##
+    """
+    フェイク爆弾2に関するクラス
+    """
+    def __init__(self, color: tuple[int, int, int], rad: int):
+        """
+        引数に基づき爆弾円Surfaceを生成する
+        引数1 color：爆弾円の色タプル
+        引数2 rad：爆弾円の半径
+        """
+        self.img = pg.Surface((2*rad, 2*rad))
+        pg.draw.circle(self.img, color, (rad, rad), rad)
+        self.img.set_colorkey((0, 0, 0))
+        self.rct = self.img.get_rect()
+        self.rct.center = random.randint(20, WIDTH-20), random.randint(20, HEIGHT-20)
+        self.vx, self.vy = +5, +5
+
+    def update(self, screen: pg.Surface):
+        """
+        爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        yoko, tate = check_bound(self.rct)
+        if not yoko:
+            self.vx *= -1
+        if not tate:
+            self.vy *= -1
+        self.rct.move_ip(self.vx, self.vy)
+        screen.blit(self.img, self.rct)
+
+
+class Next1: ##
+    """
+    フェイク爆弾1の技を発動できるか出来ないかを判定する
+    """
+    def __init__(self):
+        """
+        丸かバツを表示するクラス
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
+        self.color = (0, 0, 255) #文字色の設定
+        self.num = 501 #フェイク爆弾を出すか出さないかを判断する数
+        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
+        self.img2 = self.fonto.render(f"✕", 0, self.color)
+        self.ix, self.iy = 50, HEIGHT-100
+
+    def update(self, screen: pg.Surface):
+        """
+        フェイク爆弾1を発動できるか出来ないかの判定を行い表示する
+        引数 screen：画面Surface
+        """
+        if self.num >= 500 :
+            self.img1 = self.fonto.render(f"〇", 0, self.color)
+            screen.blit(self.img1, (self.ix, self.iy))
+        else:
+            self.img2 = self.fonto.render(f"バツ", 0, self.color)
+            screen.blit(self.img2, (self.ix, self.iy))
+
+
+class Next2: ##
+    """
+    フェイク爆弾2の技を発動できるか出来ないかを判定する
+    """
+    def __init__(self):
+        """
+        丸かバツを表示するクラス
+        """
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
+        self.color = (0, 0, 255) #文字色の設定
+        self.num = 501 #フェイク爆弾を出すか出さないかを判断する数
+        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
+        self.img2 = self.fonto.render(f"✕", 0, self.color)
+        self.ix, self.iy = 650, HEIGHT-100
+
+    def update(self, screen: pg.Surface):
+        """
+        フェイク爆弾2を発動できるか出来ないかの判定を行い表示する
+        引数 screen：画面Surface
+        """
+        if self.num >= 500 :
+            self.img1 = self.fonto.render(f"〇", 0, self.color)
+            screen.blit(self.img1, (self.ix, self.iy))
+        else:
+            self.img2 = self.fonto.render(f"バツ", 0, self.color)
+            screen.blit(self.img2, (self.ix, self.iy))
+
+
 def main():
     NUM_OF_BOMBS = 1
     pg.display.set_caption("たたかえ！こうかとん")
@@ -499,6 +617,10 @@ def main():
     goal1 = Goal((WIDTH-10, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     goal2 = Goal((0, HEIGHT/2-100), 10, 200, (0, 255, 0))  # ゴールを生成
     clock = pg.time.Clock()
+    fake1 = None
+    fake2 = None
+    next1 = Next1() ##
+    next2 = Next2() ##
     #score = Score()
     goal_state = GoalState()  # ゲーム状態の管理
     expls = []
@@ -532,6 +654,14 @@ def main():
                 # bomb.resize(bomb.rad * 2)  # 倍率の場合（押すたびに変化）
                 bomb.resize(50)  # 固定の大きさの場合
                 bomb.count_large_2 = 0
+            
+            if event.type == pg.KEYDOWN and event.key == pg.K_4 and next1.num >= 500: ##bを押すとfakeボール1が出る
+                fake1 = Fake1((255, 0, 0), 10) ##
+                next1.num = 0 ##
+            
+            if event.type == pg.KEYDOWN and event.key == pg.K_0 and next2.num >= 500: ##bを押すとfakeボール2が出る
+                fake2 = Fake2((255, 0, 0), 10) ##
+                next2.num = 0 ##
 
         if bomb.count_large_1 == 200:  # 4秒(200frame)でボールが元に戻る
             bomb.resize(10)
@@ -579,7 +709,7 @@ def main():
             if bird2.rct.colliderect(bomb.rct):
                 check_coll(bomb, bird2)
         key_lst = pg.key.get_pressed()
-        # プレイヤー1のスキル（0: 色変更、9: 高さ縮小）
+        # プレイヤー1のスキル（7: 色変更、8: 高さ縮小）
         if key_lst[pg.K_7] and goal_state.cooldowns["color_p1"] == 0:
             goal1.skill_effect(10 * 50, (255, 255, 0))
             goal_state.cooldowns["color_p1"] = 20 * 50
@@ -624,8 +754,8 @@ def main():
             bomb.update(screen)
         # スコアの表示更新
         font = pg.font.Font(None, 40)
-        p1_score_text = font.render(f"P1 Score: {goal_state.scores['player1']}", True, (0, 0, 255))
-        p2_score_text = font.render(f"P2 Score: {goal_state.scores['player2']}", True, (255, 0, 0))
+        p1_score_text = font.render(f"P1 Score: {goal_state.scores['player2']}", True, (0, 0, 255))
+        p2_score_text = font.render(f"P2 Score: {goal_state.scores['player1']}", True, (255, 0, 0))
         screen.blit(p1_score_text, (WIDTH - 200, HEIGHT - 50))
         screen.blit(p2_score_text, (10, HEIGHT - 50))
         #score.update(screen)
@@ -640,10 +770,31 @@ def main():
         #     sp_left.sp += 1
         #     sp_right.sp += 1
         limit.update(screen)
+
+        if fake1 is not None: ##
+            if next1.num == 500: #fakeボール1がでて200フレームたったらfakeボール1が消える
+                next1.num = 0 ##
+                fake1 = None #fake1をNoneに戻す
+
+            if fake1 is not None: ##
+                fake1.update(screen) ##
+        
+        if fake2 is not None: ##
+            if next2.num == 500: #fakeボール2がでて200フレームたったらfakeボールが消える
+                next2.num = 0 ##
+                fake2 = None #fake2をNoneに戻す
+
+            if fake2 is not None: ##
+                fake2.update(screen) ##
+
+        next1.update(screen) ##
+        next2.update(screen) ##
         pg.display.update()
         tmr += 1
         bomb.count_large_1 += 1  # 1P frameカウント_爆弾大きさスキル用
         bomb.count_large_2 += 1  # 2P frameカウント_爆弾大きさスキル用
+        next1.num += 1 ##
+        next2.num += 1 ##
         clock.tick(50)
 
 
