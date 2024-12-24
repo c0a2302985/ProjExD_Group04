@@ -192,20 +192,20 @@ class Bomb:
         self.large_frame = 400  # 発動に必要なframeカウント数 (爆弾の大きさ変更スキル用)
 
         if self.count_large_1 >= self.large_frame:  # 1P
-            self.img_mozi_1 = self.fonto.render("1P 爆弾スキルOK！", 0, (255, 0, 0))
+            self.img_mozi_1 = self.fonto.render("9", 0, (255, 0, 0))
             self.rct_mozi_1 = self.img_mozi_1.get_rect()
-            self.rct_mozi_1.center = (500, 100)
+            self.rct_mozi_1.center = (WIDTH-200, 100)
         else:
-            self.img_mozi_1 = self.fonto.render("1P まだ！", 0, (255, 0, 0))
+            self.img_mozi_1 = self.fonto.render("9", 0, (255, 0, 0))
             self.rct_mozi_1 = self.img_mozi_1.get_rect()
-            self.rct_mozi_1.center = (500, 100)
+            self.rct_mozi_1.center = (WIDTH-200, 100)
 
         if self.count_large_2 >= self.large_frame:  # 2P
-            self.img_mozi_2 = self.fonto.render("2P 爆弾スキルOK！", 0, (255, 0, 0))
+            self.img_mozi_2 = self.fonto.render("3", 0, (255, 0, 0))
             self.rct_mozi_2 = self.img_mozi_2.get_rect()
             self.rct_mozi_2.center = (200, 100)    
         else:
-            self.img_mozi_2 = self.fonto.render("2P まだ！", 0, (255, 0, 0))
+            self.img_mozi_2 = self.fonto.render("3", 0, (255, 0, 0))
             self.rct_mozi_2 = self.img_mozi_2.get_rect()
             self.rct_mozi_2.center = (200, 100)
 
@@ -245,16 +245,16 @@ class Bomb:
 
         # 爆弾大きさスキル
         if self.count_large_1 >= self.large_frame:  # 1P
-            self.img_mozi_1 = self.fonto.render("1P 爆弾スキルOK！", 0, (255, 0, 0))
+            self.img_mozi_1 = self.fonto.render("9", 0, (255, 0, 0))
             screen.blit(self.img_mozi_1, self.rct_mozi_1)
         else:
-            self.img_mozi_1 = self.fonto.render("まだ！", 0, (255, 0, 0))
+            self.img_mozi_1 = self.fonto.render("9", 0, (0, 0, 0))
             screen.blit(self.img_mozi_1, self.rct_mozi_1)
         if self.count_large_2 >= self.large_frame:  # 2P
-            self.img_mozi_2 = self.fonto.render("2P 爆弾スキルOK！", 0, (255, 0, 0))
+            self.img_mozi_2 = self.fonto.render("3", 0, (255, 0, 0))
             screen.blit(self.img_mozi_2, self.rct_mozi_2)
         else:
-            self.img_mozi_2 = self.fonto.render("まだ！", 0, (255, 0, 0))
+            self.img_mozi_2 = self.fonto.render("3", 0, (0, 0, 0))
             screen.blit(self.img_mozi_2, self.rct_mozi_2)
 
 
@@ -560,9 +560,13 @@ class Next1: ##
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
         self.color = (0, 0, 255) #文字色の設定
         self.num = 501 #フェイク爆弾を出すか出さないかを判断する数
-        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
-        self.img2 = self.fonto.render(f"✕", 0, self.color)
-        self.ix, self.iy = 50, HEIGHT-100
+        self.img1 = self.fonto.render(f"4", 0, (255, 0, 0)) #文字列Surface
+        self.rct1 = self.img1.get_rect()
+        self.rct1.center = (250, 100)
+        self.img2 = self.fonto.render(f"4", 0, (0, 0, 0))
+        self.rct2 = self.img2.get_rect()
+        self.rct2.center = (250, 100)
+        # self.ix, self.iy = 300, 100
 
     def update(self, screen: pg.Surface):
         """
@@ -570,11 +574,11 @@ class Next1: ##
         引数 screen：画面Surface
         """
         if self.num >= 500 :
-            self.img1 = self.fonto.render(f"〇", 0, self.color)
-            screen.blit(self.img1, (self.ix, self.iy))
+            self.img1 = self.fonto.render(f"4", 0, (255, 0, 0))
+            screen.blit(self.img1, self.rct1)
         else:
-            self.img2 = self.fonto.render(f"バツ", 0, self.color)
-            screen.blit(self.img2, (self.ix, self.iy))
+            self.img2 = self.fonto.render(f"4", 0, (0, 0, 0))
+            screen.blit(self.img2, self.rct2)
 
 
 class Next2: ##
@@ -588,9 +592,13 @@ class Next2: ##
         self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
         self.color = (0, 0, 255) #文字色の設定
         self.num = 501 #フェイク爆弾を出すか出さないかを判断する数
-        self.img1 = self.fonto.render(f"〇", 0, self.color) #文字列Surface
-        self.img2 = self.fonto.render(f"✕", 0, self.color)
-        self.ix, self.iy = 650, HEIGHT-100
+        self.img1 = self.fonto.render(f"0", 0, (255, 0, 0)) #文字列Surface
+        self.rct1 = self.img1.get_rect()
+        self.rct1.center = (WIDTH-150, 100)
+        self.img2 = self.fonto.render(f"0", 0, (0, 0, 0))
+        self.rct2 = self.img2.get_rect()
+        self.rct2.center = (WIDTH-150, 100)
+        self.ix, self.iy = 650, 80
 
     def update(self, screen: pg.Surface):
         """
@@ -598,11 +606,11 @@ class Next2: ##
         引数 screen：画面Surface
         """
         if self.num >= 500 :
-            self.img1 = self.fonto.render(f"〇", 0, self.color)
-            screen.blit(self.img1, (self.ix, self.iy))
+            self.img1 = self.fonto.render(f"0", 0, (255, 0, 0))
+            screen.blit(self.img1, self.rct1)
         else:
-            self.img2 = self.fonto.render(f"バツ", 0, self.color)
-            screen.blit(self.img2, (self.ix, self.iy))
+            self.img2 = self.fonto.render(f"0", 0, (0, 0, 0))
+            screen.blit(self.img2, self.rct2)
 
 
 def main():
@@ -723,6 +731,51 @@ def main():
         if key_lst[pg.K_2] and goal_state.cooldowns["size_p2"] == 0:
             goal2.skill_effect(10 * 50, reduce_height=True)
             goal_state.cooldowns["size_p2"] = 15 * 50
+
+        fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #フォント
+
+        if goal_state.cooldowns["color_p2"] == 0:
+            img1 = fonto.render(f"1", 0, (255, 0, 0)) #文字列Surface
+            rct1 = img1.get_rect()
+            rct1.center = (100, 100)
+            screen.blit(img1, rct1)
+        else:
+            img1 = fonto.render(f"1", 0, (0, 0, 0)) #文字列Surface
+            rct1 = img1.get_rect()
+            rct1.center = (100, 100)
+            screen.blit(img1, rct1)
+        if goal_state.cooldowns["color_p1"] == 0:
+            img1 = fonto.render(f"7", 0, (255, 0, 0)) #文字列Surface
+            rct1 = img1.get_rect()
+            rct1.center = (WIDTH-300, 100)
+            screen.blit(img1, rct1)
+        else:
+            img1 = fonto.render(f"7", 0, (0, 0, 0)) #文字列Surface
+            rct1 = img1.get_rect()
+            rct1.center = (WIDTH-300, 100)
+            screen.blit(img1, rct1)
+
+        if goal_state.cooldowns["size_p2"] == 0:
+            img2 = fonto.render(f"2", 0, (255, 0, 0)) #文字列Surface
+            rct2 = img2.get_rect()
+            rct2.center = (150, 100)
+            screen.blit(img2, rct2)
+        else:
+            img2 = fonto.render(f"2", 0, (0, 0, 0)) #文字列Surface
+            rct2 = img2.get_rect()
+            rct2.center = (150, 100)
+            screen.blit(img2, rct2)
+        if goal_state.cooldowns["size_p1"] == 0:
+            img2 = fonto.render(f"8", 0, (255, 0, 0)) #文字列Surface
+            rct2 = img2.get_rect()
+            rct2.center = (WIDTH-250, 100)
+            screen.blit(img2, rct2)
+        else:
+            img2 = fonto.render(f"8", 0, (0, 0, 0)) #文字列Surface
+            rct2 = img2.get_rect()
+            rct2.center = (WIDTH-250, 100)
+            screen.blit(img2, rct2)
+
         # # スキル状態を描画
         # draw_skill_status(screen, goal_state, font)
         # ボールがゴールに到達した場合の処理
@@ -743,6 +796,28 @@ def main():
 
         freeze_bird.update()
         freeze_bird2.update()
+
+
+        if left_sp >= SP_COST:
+            img3 = fonto.render(f"LSHIFT", 0, (255, 0, 0)) #文字列Surface
+            rct3 = img3.get_rect()
+            rct3.center = (350, 100)
+            screen.blit(img3, rct3)
+        else:
+            img3 = fonto.render(f"LSHIFT", 0, (0, 0, 0)) #文字列Surface
+            rct3 = img3.get_rect()
+            rct3.center = (350, 100)
+            screen.blit(img3, rct3)
+        if right_sp >= SP_COST:
+            img3 = fonto.render(f"RSHIFT", 0, (255, 0, 0)) #文字列Surface
+            rct3 = img3.get_rect()
+            rct3.center = (WIDTH-50, 100)
+            screen.blit(img3, rct3)
+        else:
+            img3 = fonto.render(f"RSHIFT", 0, (0, 0, 0)) #文字列Surface
+            rct3 = img3.get_rect()
+            rct3.center = (WIDTH-50, 100)
+            screen.blit(img3, rct3)
 
         bird.frozen = freeze_bird.is_active()
         bird2.frozen = freeze_bird2.is_active()
